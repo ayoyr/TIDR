@@ -1,18 +1,17 @@
-// data_provider.js (全文・CSVヘッダーなし対応・エラー対策強化版)
+// data_provider.js (画像パス収集メソッドgetAllImagePathsToPreload追加版・全文)
 
 class DataProvider {
     constructor(config) {
         this.config = config;
-        this.userSettings = this.loadUserSettings(); // membersパースより先に実行してweightの初期値に使う
-        this.members = this.parseMembers(config.members); // ここで this.members が初期化される
-        this.serifsByMember = {}; // メンバー名ごとにセリフを格納するオブジェクト
+        this.userSettings = this.loadUserSettings();
+        this.members = this.parseMembers(config.members);
+        this.serifsByMember = {};
     }
 
-    // configからメンバー情報を扱いやすい形に初期化
     parseMembers(memberConfigs) {
         if (!memberConfigs || memberConfigs.length === 0) {
             console.error("config.jsにメンバー情報 (config.members) が設定されていないか空です。");
-            return []; // 空の配列を返す
+            return [];
         }
         return memberConfigs.map(member => ({
             id: member.id,
@@ -26,46 +25,38 @@ class DataProvider {
         }));
     }
 
-    // 全メンバーの情報を取得
     getAllMembers() {
         return this.members;
     }
 
-    // IDで特定のメンバー情報を取得
     getMemberById(id) {
         return this.members.find(member => member.id === id);
     }
 
-    // Nameで特定のメンバー情報を取得 (セリフ紐付け用)
     getMemberByName(name) {
         return this.members.find(member => member.name === name);
     }
 
-    // 特定メンバーの指定タイプ(ero/hutuu)の画像パスリストを取得
     getMemberImagePaths(memberId, imageType = 'ero') {
         const member = this.getMemberById(memberId);
         if (!member || !member.imageFolders || !member.imageFolders[imageType]) {
             console.warn(`メンバーID "${memberId}" または画像タイプ "${imageType}" の情報が見つかりません (member or imageFolders or imageType invalid)。`);
             return ['images/placeholder.png'];
         }
-
         const folderInfo = member.imageFolders[imageType];
         const basePath = folderInfo.path;
         const count = folderInfo.imageCount;
         const paths = [];
-
         if (typeof count !== 'number' || count === 0) {
             console.warn(`メンバー ${member.name} (${memberId}) の ${imageType} 画像枚数 (imageCount) が0または不正です。placeholderを表示します。`);
             return ['images/placeholder.png'];
         }
-
         for (let i = 1; i <= count; i++) {
             paths.push(`${basePath}${i}.jpg`);
         }
         return paths;
     }
 
-    // 指定されたメンバーのセリフをランダムに取得
     getRandomSerif(memberId) {
         const member = this.getMemberById(memberId);
         if (!member || !member.name) {
@@ -79,7 +70,6 @@ class DataProvider {
         return `${member.name}のセリフは準備中です。`;
     }
 
-    // --- ユーザー設定関連 ---
     loadUserSettings() {
         const storedWeights = localStorage.getItem(this.config.localStorageKeys.memberWeights);
         let memberWeights = {};
@@ -113,7 +103,6 @@ class DataProvider {
         }
     }
 
-    // --- セリフCSV読み込みとパース ---
     async loadSerifs() {
         try {
             const response = await fetch(this.config.data.serifCsvPath);
@@ -123,7 +112,7 @@ class DataProvider {
                 return;
             }
             const csvData = await response.text();
-            this.parseSerifCsv(csvData); // パース処理を呼び出す
+            this.parseSerifCsv(csvData);
             console.log("セリフデータを読み込み、パース処理を試みました。");
         } catch (error) {
             console.error(`セリフCSV (${this.config.data.serifCsvPath}) の読み込み中にネットワークエラー等が発生しました:`, error);
@@ -131,25 +120,19 @@ class DataProvider {
         }
     }
 
-    // CSV文字列をパースしてメンバーごとにセリフを格納する (ヘッダーなしCSV対応版)
-    parseSerifCsv(csvData) {
-        this.serifsByMember = {}; // 初期化
+    parseSerifCsv(csvData) { // ヘッダーなしCSV対応
+        this.serifsByMember = {};
         const lines = csvData.split(/\r?\n/);
-
         if (lines.length === 0 || (lines.length === 1 && lines[0].trim() === '')) {
             console.warn("セリフCSVファイルが空か、内容がありません。");
-            this.generateDummySerifsForAllMembers(); // ダミー生成
+            this.generateDummySerifsForAllMembers();
             return;
         }
-
-        // 列のインデックスを固定値として定義 (0から始まる)
-        const memberNameIndex = 0; // 1列目がメンバー名
-        const quoteIndex = 1;      // 2列目がセリフ
-        const tagsIndex = 2;       // 3列目がタグ (この列は存在しなくても良い)
-
+        const memberNameIndex = 0;
+        const quoteIndex = 1;
+        const tagsIndex = 2;
         lines.forEach((line, lineIndex) => {
-            if (line.trim() === '') return; // 空行はスキップ
-
+            if (line.trim() === '') return;
             const values = [];
             let currentField = '';
             let inQuotes = false;
@@ -170,23 +153,19 @@ class DataProvider {
                 }
             }
             values.push(currentField);
-
             if (values.length > quoteIndex) {
                 const memberName = values[memberNameIndex].trim();
                 let quote = values[quoteIndex];
-
                 if (typeof quote === 'string') {
                     if (quote.startsWith('"') && quote.endsWith('"')) {
                         quote = quote.substring(1, quote.length - 1);
                     }
                     quote = quote.replace(/""/g, '"').trim();
                 } else {
-                    quote = ''; // quoteがundefinedやnullの場合、空文字にする
+                    quote = '';
                 }
-
                 const tagsString = (values.length > tagsIndex && values[tagsIndex] !== undefined) ? values[tagsIndex] : '';
                 const tags = tagsString ? tagsString.split(this.config.data.csvTagSeparator || '|').map(tag => tag.trim()) : [];
-
                 if (memberName) {
                     if (!this.serifsByMember[memberName]) {
                         this.serifsByMember[memberName] = [];
@@ -199,8 +178,6 @@ class DataProvider {
                  console.warn(`セリフCSV ${lineIndex + 1}行目: 列の数が不足しています (メンバー名とセリフの2列は必須)。 Line: "${line}"`);
             }
         });
-
-        // セリフが一つも読み込めなかったメンバーにダミーセリフを割り当てる
         if (this.members && typeof this.members.forEach === 'function') {
             this.members.forEach(member => {
                 if (!this.serifsByMember[member.name] || this.serifsByMember[member.name].length === 0) {
@@ -219,16 +196,13 @@ class DataProvider {
         }
     }
 
-    // 全メンバーにダミーセリフを生成する（CSV読み込み失敗時など）
     generateDummySerifsForAllMembers() {
         console.warn("全メンバーにダミーセリフを生成します（generateDummySerifsForAllMembers呼び出し）。");
         if (this.members && typeof this.members.forEach === 'function') {
             this.members.forEach(member => {
-                // 既にserifsByMemberにエントリがなくても、ここで作成してダミーを追加
                 if (!this.serifsByMember[member.name]) {
                     this.serifsByMember[member.name] = [];
                 }
-                // ダミーを重複して追加しないように簡易チェック
                 const hasDummy = this.serifsByMember[member.name].some(serif => serif.quote.includes("ダミーセリフです"));
                 if (!hasDummy) {
                      this.serifsByMember[member.name].push({ quote: `${member.name}のダミーセリフです。CSVを確認してください。`, tags: [] });
@@ -239,10 +213,51 @@ class DataProvider {
         }
     }
 
-    // アプリ初期化時に全てのデータを読み込む
+    /**
+     * アプリケーションで使用する全ての画像パスを収集する
+     * @returns {string[]} 画像パスの配列
+     */
+    getAllImagePathsToPreload() {
+        const imagePaths = new Set();
+        if (this.members && this.members.length > 0) {
+            this.members.forEach(member => {
+                if (member.profileIcon) {
+                    imagePaths.add(member.profileIcon);
+                }
+                if (member.imageFolders && member.imageFolders.hutuu && member.imageFolders.hutuu.path && member.imageFolders.hutuu.imageCount > 0) {
+                    const hutuuFolder = member.imageFolders.hutuu;
+                    for (let i = 1; i <= hutuuFolder.imageCount; i++) {
+                        imagePaths.add(`${hutuuFolder.path}${i}.jpg`);
+                    }
+                }
+                if (member.imageFolders && member.imageFolders.ero && member.imageFolders.ero.path && member.imageFolders.ero.imageCount > 0) {
+                    const eroFolder = member.imageFolders.ero;
+                    for (let i = 1; i <= eroFolder.imageCount; i++) {
+                        imagePaths.add(`${eroFolder.path}${i}.jpg`);
+                    }
+                }
+            });
+        } else {
+            console.warn("メンバー情報が見つからないため、メンバー画像のプリロードはスキップされます。");
+        }
+        if (this.config.fever && this.config.fever.stickerPaths && this.config.fever.stickerPaths.length > 0) {
+            this.config.fever.stickerPaths.forEach(path => imagePaths.add(path));
+        }
+        if (this.config.swipe) {
+            if (this.config.swipe.likeOverlayPath) {
+                imagePaths.add(this.config.swipe.likeOverlayPath);
+            }
+            if (this.config.swipe.nopeOverlayPath) {
+                imagePaths.add(this.config.swipe.nopeOverlayPath);
+            }
+        }
+        imagePaths.add('images/placeholder.png');
+        console.log(`Total unique images to preload: ${imagePaths.size}`);
+        return Array.from(imagePaths);
+    }
+
     async loadAllData() {
-        // メンバー情報はコンストラクタでパース済み
-        await this.loadSerifs(); // セリフを読み込む
+        await this.loadSerifs();
         console.log("DataProvider: 全データの読み込み処理が完了しました。");
     }
 }
