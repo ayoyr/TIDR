@@ -1,4 +1,4 @@
-// App.js (全文・フィーバー演出UI呼び出し対応版)
+// App.js (全文・window.feverHandlerInstance 設定)
 
 document.addEventListener('DOMContentLoaded', () => {
     const loadingScreen = document.getElementById('loadingScreen');
@@ -10,6 +10,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const dataProvider = new DataProvider(config);
     const uiHandler = new UIHandler(config);
     const feverHandler = new FeverHandler(config, uiHandler, dataProvider);
+    // ★ UIHandlerからFeverHandlerのメソッドを呼び出せるようにグローバルに参照を保持
+    if (typeof window !== 'undefined') { // ブラウザ環境でのみ実行
+        window.feverHandlerInstance = feverHandler;
+    }
     const cardManager = new CardManager(config, uiHandler, dataProvider, feverHandler);
 
     /**
