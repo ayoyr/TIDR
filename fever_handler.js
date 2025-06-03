@@ -1,18 +1,19 @@
-// FeverHandler.js (全文・基本フロー実装)
+// FeverHandler.js (全文・スタンプ演出ロジック追加)
 
 class FeverHandler {
     constructor(config, uiHandler, dataProvider) {
-        this.config = config.fever; // configオブジェクト内のfever設定を使用
+        this.config = config.fever;
         this.uiHandler = uiHandler;
-        this.dataProvider = dataProvider; // DataProviderのインスタンスを保持
+        this.dataProvider = dataProvider;
 
         this.currentGaugeValue = 0;
         this.isFeverActive = false;
         this.feverTimerId = null;
         this.feverEndTime = 0;
+        this.stampIntervalId = null;
+        this.activeStickersCount = 0; // DOMに実際に存在するスタンプの数を管理
 
-        // 初期ゲージ表示 (もし必要ならUIHandler経由で)
-        // this.uiHandler.updateFeverGauge(this.calculateGaugePercentage(), null);
+        // 初期ゲージ表示 (App.jsのinitializeAppで行うように変更)
     }
 
     calculateGaugePercentage() {
@@ -20,28 +21,17 @@ class FeverHandler {
         return Math.min((this.currentGaugeValue / this.config.maxGauge) * 100, 100);
     }
 
-    // 右スワイプ時に呼び出される
     handleRightSwipe(swipedCardData) {
-        if (this.isFeverActive) return; // フィーバー中はゲージ増加なし
+        if (this.isFeverActive) return;
 
         this.currentGaugeValue++;
-        // DataProviderに高評価画像として通知
         this.dataProvider.addLikedImage(swipedCardData);
 
         const percentage = this.calculateGaugePercentage();
-        // console.log(`Fever gauge: ${this.currentGaugeValue}/${this.config.maxGauge} (${percentage}%)`);
-
-        // UIHandler経由でフィーバーゲージの見た目を更新
-        // ★注意: ゲージの色はアクティブなカードのメンバーカラーに連動させる想定だったため、
-        //   uiHandler.updateFeverGauge に渡す色情報が必要。
-        //   ここでは一旦 null にしておくか、config から固定色を取得する。
-        //   App.js などから現在のメンバーカラーを取得して渡すのがより正確。
-        //   今回は、UIHandler側で最後に表示したメンバーカラーを保持しているか、
-        //   あるいは、config.fever.gaugeColor を参照するようにする。
-        const activeCardMemberColor = this.uiHandler.cardElements.length > 0 && this.uiHandler.cardElements[0].dataset.memberId ?
-                                   this.dataProvider.getMemberById(this.uiHandler.cardElements[0].dataset.memberId)?.color : null;
-        this.uiHandler.updateFeverGauge(percentage, this.config.gaugeColor || activeCardMemberColor);
-
+        const activeCardMember = this.uiHandler.cardElements.length > 0 && this.uiHandler.cardElements[0] ?
+                                 this.dataProvider.getMemberById(this.uiHandler.cardElements[0].dataset.memberId) : null;
+        const memberColor = activeCardMember ? activeCardMember.color : null;
+        this.uiHandler.updateFeverGauge(percentage, this.config.gaugeColor || memberColor);
 
         if (this.currentGaugeValue >= this.config.maxGauge) {
             this.startFeverMode();
@@ -51,41 +41,38 @@ class FeverHandler {
     startFeverMode() {
         if (this.isFeverActive) return;
 
-        // 高評価画像が1枚もなければフィーバーに入らない (または別の処理)
         if (this.dataProvider.getLikedImages().length === 0) {
             console.warn("高評価画像がないため、フィーバーモードを開始できません。ゲージをリセットします。");
-            this.currentGaugeValue = 0; // ゲージをリセット
+            this.currentGaugeValue = 0;
             this.uiHandler.updateFeverGauge(this.calculateGaugePercentage(), null);
             return;
         }
 
         this.isFeverActive = true;
-        this.currentGaugeValue = this.config.maxGauge; // ゲージを最大値に固定 (または時間経過で減少させる)
+        this.currentGaugeValue = this.config.maxGauge;
         this.feverEndTime = Date.now() + this.config.duration;
 
         console.log("FEVER MODE STARTED!");
         document.dispatchEvent(new CustomEvent('feverModeStarted'));
 
-        // フィーバーゲージが時間経過で減少するタイマーを開始
         this.feverTimerId = setInterval(() => {
             const timeLeft = this.feverEndTime - Date.now();
             if (timeLeft <= 0) {
                 this.endFeverMode();
             } else {
                 const percentageLeft = (timeLeft / this.config.duration) * 100;
-                this.uiHandler.updateFeverGauge(percentageLeft, this.config.gaugeColor || '#FFD700'); // フィーバー中は専用の色など
+                this.uiHandler.updateFeverGauge(percentageLeft, this.config.gaugeColor || '#FFD700');
             }
-        }, 250); // 0.25秒ごとに更新
+        }, 250);
 
-        // TODO: ステップ3でスタンプ演出を開始する
-        // this.startStampAnimation();
+        this.startStampAnimation(); // スタンプアニメーション開始
     }
 
     endFeverMode() {
         if (!this.isFeverActive) return;
 
         this.isFeverActive = false;
-        this.currentGaugeValue = 0; // フィーバー終了時にゲージをリセット
+        this.currentGaugeValue = 0;
         if (this.feverTimerId) {
             clearInterval(this.feverTimerId);
             this.feverTimerId = null;
@@ -93,19 +80,51 @@ class FeverHandler {
 
         console.log("FEVER MODE ENDED!");
         document.dispatchEvent(new CustomEvent('feverModeEnded'));
+        
+        const activeCardMember = this.uiHandler.cardElements.length > 0 && this.uiHandler.cardElements[0] ?
+                                 this.dataProvider.getMemberById(this.uiHandler.cardElements[0].dataset.memberId) : null;
+        const memberColor = activeCardMember ? activeCardMember.color : null;
+        this.uiHandler.updateFeverGauge(this.calculateGaugePercentage(), memberColor);
 
-        // ゲージを通常状態に戻す
-        this.uiHandler.updateFeverGauge(this.calculateGaugePercentage(), null); // 色も通常に
-
-        // TODO: ステップ3でスタンプ演出を停止する
-        // this.stopStampAnimation();
+        this.stopStampAnimation(); // スタンプアニメーション停止
+        this.uiHandler.clearStickers(); // 残っているスタンプをクリア
     }
 
     getIsFeverActive() {
         return this.isFeverActive;
     }
 
-    // --- スタンプ演出関連 (ステップ3で実装) ---
-    // startStampAnimation() { console.log("Stamp animation started (not implemented yet)"); }
-    // stopStampAnimation() { console.log("Stamp animation stopped (not implemented yet)"); }
+    startStampAnimation() {
+        if (!this.config.stickerPaths || this.config.stickerPaths.length === 0) {
+            console.warn("フィーバーステッカーのパスが設定されていません。");
+            return;
+        }
+        this.activeStickersCount = 0; // カウントリセット
+        this.stampIntervalId = setInterval(() => {
+            if (this.isFeverActive && this.activeStickersCount < (this.config.maxStickersOnScreen || 5)) {
+                const randomIndex = Math.floor(Math.random() * this.config.stickerPaths.length);
+                const stickerPath = this.config.stickerPaths[randomIndex]; // 修正: stickerPathがundefinedになる可能性を排除
+                if (stickerPath) {
+                    const stickerId = `sticker-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+                    this.uiHandler.addSticker(stickerPath, stickerId);
+                    this.activeStickersCount++;
+
+                    // スタンプがアニメーション終了後にDOMから消えるので、
+                    // activeStickersCount を減らすタイミングもそれに合わせる
+                    // UIHandler の addSticker で animationend を監視しているので、そこでカウントを減らすコールバックを渡すか、
+                    // ここで固定時間で減らす (CSSのアニメーション時間と同期させる必要がある)
+                    setTimeout(() => {
+                        this.activeStickersCount = Math.max(0, this.activeStickersCount - 1);
+                    }, 3000); // CSSの animation-duration (3s) と合わせる
+                }
+            }
+        }, this.config.stickerInterval || 500);
+    }
+
+    stopStampAnimation() {
+        if (this.stampIntervalId) {
+            clearInterval(this.stampIntervalId);
+            this.stampIntervalId = null;
+        }
+    }
 }
