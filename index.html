@@ -5,9 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>ONSP カードスワイプ</title>
     <link rel="stylesheet" href="style.css">
-</head>
+    </head>
 <body>
-    <div class="app-container">
+    <div id="loadingScreen">
+        <div class="loading-content">
+            <p id="loadingMessage">画像を読み込んでいます...</p>
+            <div class="progress-bar-container">
+                <div id="loadingProgressBar"></div>
+            </div>
+            <p id="loadingPercentage">0%</p>
+        </div>
+    </div>
+
+    <div class="app-container" style="display: none;">
         <div class="progress-area">
             <div class="story-progress-bar">
                 </div>
@@ -21,10 +31,10 @@
             </div>
 
         <button class="settings-button" id="settingsButton">
-            ⚙️ </button>
+            ⚙️
+        </button>
 
-        <div class="modal-overlay" id="settingsModalOverlay" style="display: none;">
-            <div class="modal-content">
+        <div class="modal-overlay" id="settingsModalOverlay"> <div class="modal-content">
                 <h2>設定</h2>
                 <div id="memberWeightsSettings">
                     </div>
