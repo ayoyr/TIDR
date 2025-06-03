@@ -15,38 +15,90 @@ body, html {
     text-rendering: optimizeLegibility;
 }
 
+/* ロード画面のスタイル */
+#loadingScreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #2c2c2c; /* ロード画面の背景色 */
+    display: flex; /* JSで非表示にするまでは表示 */
+    justify-content: center;
+    align-items: center;
+    z-index: 2000; /* 最前面に表示 */
+    color: #f0f0f0;
+    text-align: center;
+    flex-direction: column;
+}
+
+#loadingScreen .loading-content {
+    padding: 20px;
+}
+
+#loadingMessage {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+}
+
+.progress-bar-container {
+    width: 80%;
+    max-width: 300px;
+    height: 20px;
+    background-color: #555;
+    border-radius: 10px;
+    margin: 0 auto 10px auto;
+    overflow: hidden;
+}
+
+#loadingProgressBar {
+    width: 0%; /* 初期は0% */
+    height: 100%;
+    background-color: #4CAF50; /* プログレスバーの色 */
+    border-radius: 10px;
+    transition: width 0.1s linear; /* 幅の変更を滑らかに */
+}
+
+#loadingPercentage {
+    font-size: 1em;
+    font-weight: bold;
+}
+
+
+/* アプリ本体のスタイル */
 .app-container {
+    /* display: none; /* HTML側でインラインスタイルで初期非表示にしています */
     position: relative;
     width: 100%;
     height: 100%;
-    max-width: 480px; /* スマートフォン向けに最大幅を設定 (iPhone 12 Pro Maxの幅に近い) */
-    margin: 0 auto;    /* 中央揃え */
-    background-color: inherit; /* 親要素の背景色を継承 (bodyの動的変更に追従) */
-    display: flex;
+    max-width: 480px;
+    margin: 0 auto;
+    background-color: inherit;
+    display: flex; /* JSで表示する際にflexに戻す */
     flex-direction: column;
-    overflow: hidden; /* コンテナ内でのオーバーフローも隠す */
-    box-shadow: 0 0 20px rgba(0,0,0,0.2); /* アプリに少し影をつける (任意) */
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
 }
 
 /* 上部プログレスエリア */
 .progress-area {
     padding: 10px 15px;
-    position: relative; /* z-indexの基準 */
-    z-index: 10; /* カードより手前に表示 */
-    background-color: rgba(0,0,0,0.1); /* 背景との区別を少しつける (任意) */
-    backdrop-filter: blur(2px); /* 背景が透ける場合、少しぼかす (任意、対応ブラウザ注意) */
+    position: relative;
+    z-index: 10;
+    background-color: rgba(0,0,0,0.1);
+    backdrop-filter: blur(2px);
 }
 
 .story-progress-bar {
     display: flex;
-    height: 5px; /* 少し細く */
+    height: 5px;
     margin-bottom: 8px;
-    gap: 2px; /* セグメント間の隙間 */
+    gap: 2px;
 }
 
 .story-progress-bar .segment {
     flex-grow: 1;
-    background-color: rgba(255, 255, 255, 0.3); /* 半透明白 (背景色によって見え方が変わる) */
+    background-color: rgba(255, 255, 255, 0.3);
     border-radius: 3px;
     transition: background-color 0.3s ease;
 }
@@ -58,77 +110,72 @@ body, html {
 .fever-gauge-container {
     display: flex;
     align-items: center;
-    height: 12px; /* 少し太く */
-    background-color: rgba(0, 0, 0, 0.25); /* ゲージ背景を少し濃く */
-    border-radius: 6px; /* 高さに合わせて調整 */
-    padding: 2px; /* 内部のゲージとの間に余白 */
-    position: relative; /* FEVERテキストを重ねるため */
+    height: 12px;
+    background-color: rgba(0, 0, 0, 0.25);
+    border-radius: 6px;
+    padding: 2px;
+    position: relative;
 }
 
 .fever-gauge {
-    width: 0%; /* 初期値は0% */
+    width: 0%;
     height: 100%;
-    background-color: #ff4081; /* デフォルトのフィーバーゲージ色 */
-    border-radius: 4px; /* コンテナのpaddingに合わせて調整 */
-    transition: width 0.3s ease, background-color 0.3s ease; /* 色の変更もアニメーション */
+    background-color: #ff4081;
+    border-radius: 4px;
+    transition: width 0.3s ease, background-color 0.3s ease;
 }
 
-.fever-gauge-container span { /* "FEVER" テキスト */
+.fever-gauge-container span {
     position: absolute;
     right: 8px;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 9px; /* 少し小さく */
+    font-size: 9px;
     font-weight: bold;
     color: white;
-    text-shadow: 0 0 2px rgba(0,0,0,0.5); /* テキストに見やすさのため影 */
+    text-shadow: 0 0 2px rgba(0,0,0,0.5);
 }
 
 /* メインカードエリア */
 .card-stack-area {
-    flex-grow: 1; /* 残りの高さをすべて使用 */
+    flex-grow: 1;
     display: flex;
     justify-content: center;
-    align-items: center; /* カードを中央に配置 */
-    position: relative; /* カードを重ねるために必要 */
+    align-items: center;
+    position: relative;
     padding: 10px;
-    overflow: hidden; /* はみ出したカードを隠す */
-    perspective: 1000px; /* 3D回転のための視点 (任意) */
+    overflow: hidden;
+    perspective: 1000px;
 }
 
 .card {
-    width: calc(100% - 20px); /* paddingを考慮した幅 (最大幅は下のmax-widthで指定) */
-    height: calc(100% - 20px); /* paddingを考慮した高さ (最大高さは下のmax-heightで指定) */
-    max-width: 380px; /* カードの最大幅 */
-    max-height: 600px; /* カードの最大高さ */
-    background-color: #f0f0f0; /* カードの背景色 (画像がない場合など) */
+    width: calc(100% - 20px);
+    height: calc(100% - 20px);
+    max-width: 380px;
+    max-height: 600px;
+    background-color: #f0f0f0;
     border-radius: 15px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2), 0 1px 3px rgba(0,0,0,0.1); /* 少しリッチな影 */
-    position: absolute; /* 重ねて表示するため (最後のカードが一番手前になるようにJSで制御) */
-    overflow: hidden; /* カード内の画像がはみ出ないように */
-
-    /* スワイプ操作のためのスタイル */
-    cursor: grab; /* ドラッグできることを示すカーソル */
-    user-select: none; /* テキスト選択を防ぐ */
-    -webkit-user-drag: none; /* 画像などのドラッグを防ぐ */
-    touch-action: none; /* スワイプ中のブラウザ標準ジェスチャを無効化 (重要) */
-
-    /* 初期状態 (JSで transform, transition を操作) */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2), 0 1px 3px rgba(0,0,0,0.1);
+    position: absolute;
+    overflow: hidden;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-drag: none;
+    touch-action: none;
     transform-origin: center center;
-    /* transition: transform 0.3s ease-out;  JSで制御するのでコメントアウトまたは削除 */
 }
 
-.card.dragging { /* ドラッグ中のスタイル (任意) */
+.card.dragging {
     cursor: grabbing;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.3), 0 6px 10px rgba(0,0,0,0.2); /* ドラッグ中少し持ち上げる感じ */
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3), 0 6px 10px rgba(0,0,0,0.2);
 }
 
 .card img.main-image {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* アスペクト比を保ちつつ全体をカバー */
-    pointer-events: none; /* 画像自体がドラッグイベントを奪わないように */
-    display: block; /* img要素下の余白対策 */
+    object-fit: cover;
+    pointer-events: none;
+    display: block;
 }
 
 .card-info {
@@ -136,95 +183,87 @@ body, html {
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 15px 20px; /* 少しパディング調整 */
+    padding: 15px 20px;
     background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0) 100%);
     color: white;
     display: flex;
-    align-items: flex-end; /* 要素を下揃えに */
-    pointer-events: none; /* カード情報部分はスワイプ操作の対象外にする */
+    align-items: flex-end;
+    pointer-events: none;
 }
 
 .profile-icon {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    border: 2px solid white; /* メンバーカラーで動的に変更 */
-    margin-right: 12px; /* 少し間隔をあける */
+    border: 2px solid white;
+    margin-right: 12px;
     object-fit: cover;
-    flex-shrink: 0; /* アイコンが縮まないように */
+    flex-shrink: 0;
 }
 
 .member-details {
     flex-grow: 1;
-    min-width: 0; /* flexアイテム内でのテキスト省略のため */
+    min-width: 0;
 }
 
 .member-name {
     font-weight: bold;
-    font-size: 1.25em; /* 少し大きく */
+    font-size: 1.25em;
     margin-bottom: 2px;
-    white-space: nowrap; /* 名前は1行で表示 */
+    white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis; /* 長い名前は省略 */
+    text-overflow: ellipsis;
 }
 
 .member-quote {
-    font-size: 0.85em; /* 少し小さく、読みやすく */
-    line-height: 1.4; /* 行間を少しあける */
-    /* 最大3行で省略 (WebKit系ブラウザ) */
+    font-size: 0.85em;
+    line-height: 1.4;
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
-    /* 他のブラウザ用の省略表示はJSでの対応や高さ固定が必要になる場合がある */
-    max-height: calc(0.85em * 1.4 * 3); /* おおよその3行分の高さ */
+    max-height: calc(0.85em * 1.4 * 3);
 }
 
 /* スワイプ時の評価オーバーレイ */
 .swipe-overlay {
     position: absolute;
-    top: 35%; /* 表示位置調整 */
+    top: 35%;
     left: 50%;
-    transform: translate(-50%, -50%) scale(0.5) rotate(-15deg); /* 初期状態: 少し小さく傾ける */
+    transform: translate(-50%, -50%) scale(0.5) rotate(-15deg);
     width: auto;
-    max-width: 120px; /* 少し小さめに */
+    max-width: 120px;
     height: auto;
     opacity: 0;
-    transition: opacity 0.2s ease-out, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* バネっぽい動き */
+    transition: opacity 0.2s ease-out, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     pointer-events: none;
     z-index: 100;
 }
-.swipe-overlay.like-overlay {
-    /* transform-origin: bottom left; */ /* 回転の基点を調整する場合 */
-}
 .swipe-overlay.nope-overlay {
-    /* transform-origin: bottom right; */
-    transform: translate(-50%, -50%) scale(0.5) rotate(15deg); /* 反対に傾ける */
+    transform: translate(-50%, -50%) scale(0.5) rotate(15deg);
 }
-
-.swipe-overlay.visible { /* 表示時のスタイル */
+.swipe-overlay.visible {
     opacity: 0.9;
-    transform: translate(-50%, -50%) scale(1) rotate(0deg); /* 表示時はまっすぐ大きく */
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
 }
-
 
 /* 設定ボタン */
 .settings-button {
     position: absolute;
-    top: 10px;  /* progress-area の高さに応じて調整 */
+    top: 10px;
     right: 15px;
     background: rgba(255,255,255,0.1);
     color: white;
     border: 1px solid rgba(255,255,255,0.3);
     border-radius: 50%;
-    width: 36px; /* 少し小さく */
+    width: 36px;
     height: 36px;
-    font-size: 18px; /* アイコンサイズ */
-    line-height: 36px; /* アイコン中央寄せ */
+    font-size: 18px;
+    line-height: 36px;
     text-align: center;
     cursor: pointer;
-    z-index: 20; /* progress-area より手前、モーダルより奥 */
+    z-index: 20;
     transition: background-color 0.2s ease;
 }
 .settings-button:hover {
@@ -239,15 +278,16 @@ body, html {
     width: 100%;
     height: 100%;
     background-color: rgba(0,0,0,0.7);
-    display: flex; /* 初期は none で JS で flex に変更 */
+    display: none; /* 初期は非表示 (JSで .visible クラスを付与して表示) */
     justify-content: center;
     align-items: center;
-    z-index: 1000; /* 最前面 */
-    opacity: 0; /* 初期状態は透明 */
-    pointer-events: none; /* 初期状態は操作不可 */
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
     transition: opacity 0.3s ease-out;
 }
-.modal-overlay.visible { /* JS でこのクラスを付与して表示 */
+.modal-overlay.visible {
+    display: flex;
     opacity: 1;
     pointer-events: auto;
 }
@@ -260,10 +300,10 @@ body, html {
     width: 85%;
     max-width: 400px;
     box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-    transform: scale(0.9); /* 初期状態は少し小さい */
+    transform: scale(0.9);
     transition: transform 0.3s ease-out;
 }
-.modal-overlay.visible .modal-content { /* 表示時に拡大 */
+.modal-overlay.visible .modal-content {
     transform: scale(1);
 }
 
@@ -288,14 +328,14 @@ body, html {
     margin-right: 10px;
 }
 .modal-content .member-weight-setting span {
-    min-width: 20px; /* 値表示用の幅確保 */
+    min-width: 20px;
     text-align: right;
     font-size: 0.9em;
 }
 
 .modal-content button {
-    display: block; /* ボタンをブロック要素に */
-    width: calc(100% - 20px); /* 少し左右に余白 */
+    display: block;
+    width: calc(100% - 20px);
     margin: 20px auto 0;
     padding: 12px 15px;
     font-size: 1em;
@@ -305,35 +345,33 @@ body, html {
     transition: background-color 0.2s ease;
 }
 .modal-content button#saveSettingsButton {
-    background-color: #4CAF50; /* 保存ボタンの色 */
+    background-color: #4CAF50;
     color: white;
 }
 .modal-content button#saveSettingsButton:hover {
     background-color: #45a049;
 }
 .modal-content button#closeSettingsModalButton {
-    background-color: #f44336; /* 閉じるボタンの色 */
+    background-color: #f44336;
     color: white;
-    margin-top: 10px; /* 保存ボタンとの間隔 */
+    margin-top: 10px;
 }
 .modal-content button#closeSettingsModalButton:hover {
     background-color: #e53935;
 }
 
-
 /* フィーバー中のスタンプ（仮のスタイル） */
 .fever-sticker {
     position: absolute;
-    width: 60px; /* ステッカーのサイズ調整 */
+    width: 60px;
     height: auto;
     pointer-events: none;
-    z-index: 5; /* カードよりは奥、背景よりは手前 */
+    z-index: 5;
     opacity: 0.8;
-    /* アニメーションはJSで動的に transform や opacity を設定 */
 }
 
 /* 表示するカードがない場合のメッセージ */
-.card-stack-area p { /* showNoMoreCardsMessage で表示するpタグ用 */
+.card-stack-area p {
     color: white;
     text-align: center;
     font-size: 1.1em;
