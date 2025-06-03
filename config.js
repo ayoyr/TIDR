@@ -1,18 +1,18 @@
-// config.js (更新案)
+// config.js (全文・hueOffsetForSticker追加版)
 
 const config = {
-    // メンバー情報: 以前のデータをベースに、id と profileIcon を追加
+    // メンバー情報
     members: [
-        // 各メンバーに id (ユニークな英数字) と profileIcon (プロフィールアイコン画像のパス) を追加してください
         {
-            id: 'mako', // 例: mako (URLや内部処理で安全に使えるID)
+            id: 'mako',
             name: 'マコ',
             imageFolders: {
                 hutuu: { path: 'images/mako/hutuu/', imageCount: 3 },
                 ero: { path: 'images/mako/ero/', imageCount: 8 }
             },
-            profileIcon: 'images/count/マコ.jpg', // 例: プロフィールアイコンのパス
-            color: '#F97430'
+            profileIcon: 'images/count/マコ.jpg',
+            color: '#F97430', // オレンジ系
+            hueOffsetForSticker: '0deg' // 仮の値: スタンプの元色に合わせて調整してください
         },
         {
             id: 'rio',
@@ -22,7 +22,8 @@ const config = {
                 ero: { path: 'images/rio/ero/', imageCount: 8 }
             },
             profileIcon: 'images/count/リオ.jpg',
-            color: '#68C2E3'
+            color: '#68C2E3', // ブルー系
+            hueOffsetForSticker: '200deg' // 仮の値
         },
         {
             id: 'maya',
@@ -32,7 +33,8 @@ const config = {
                 ero: { path: 'images/maya/ero/', imageCount: 8 }
             },
             profileIcon: 'images/count/マヤ.jpg',
-            color: '#7F3F97'
+            color: '#7F3F97', // 紫系
+            hueOffsetForSticker: '280deg' // 仮の値
         },
         {
             id: 'riku',
@@ -42,7 +44,8 @@ const config = {
                 ero: { path: 'images/riku/ero/', imageCount: 2 }
             },
             profileIcon: 'images/count/リク.jpg',
-            color: '#FDE152'
+            color: '#FDE152', // 黄色系
+            hueOffsetForSticker: '50deg' // 仮の値
         },
         {
             id: 'ayaka',
@@ -52,7 +55,8 @@ const config = {
                 ero: { path: 'images/ayaka/ero/', imageCount: 1 }
             },
             profileIcon: 'images/count/アヤカ.jpg',
-            color: '#FFFFFF'
+            color: '#FFFFFF', // 白
+            hueOffsetForSticker: '0deg', // アヤカはCSSで特別処理されるため、この値は影響しない可能性あり
         },
         {
             id: 'mayuka',
@@ -62,7 +66,8 @@ const config = {
                 ero: { path: 'images/mayuka/ero/', imageCount: 32 }
             },
             profileIcon: 'images/count/マユカ.jpg',
-            color: '#00ABA9'
+            color: '#00ABA9', // 青緑系
+            hueOffsetForSticker: '178deg' // 仮の値
         },
         {
             id: 'rima',
@@ -72,7 +77,8 @@ const config = {
                 ero: { path: 'images/rima/ero/', imageCount: 35 }
             },
             profileIcon: 'images/count/リマ.jpg',
-            color: '#B02537'
+            color: '#B02537', // 赤系
+            hueOffsetForSticker: '-10deg' // 仮の値
         },
         {
             id: 'miihi',
@@ -82,7 +88,8 @@ const config = {
                 ero: { path: 'images/miihi/ero/', imageCount: 54 }
             },
             profileIcon: 'images/count/ミイヒ.jpg',
-            color: '#F8B9C9'
+            color: '#F8B9C9', // ピンク系
+            hueOffsetForSticker: '340deg' // 仮の値
         },
         {
             id: 'nina',
@@ -92,15 +99,16 @@ const config = {
                 ero: { path: 'images/nina/ero/', imageCount: 1 }
             },
             profileIcon: 'images/count/ニナ.jpg',
-            color: '#005BAC'
+            color: '#005BAC', // 濃い青系
+            hueOffsetForSticker: '210deg' // 仮の値
         },
     ],
 
     // フィーバーモード設定
     fever: {
-        maxGauge: 10, // フィーバーゲージが最大になる右スワイプ回数 (以前の feverThreshold)
-        duration: 60000, // フィーバー持続時間 (ミリ秒, 1分) (以前の feverDuration)
-        stickerPaths: [ // フィーバー用ステッカー画像のパスリスト
+        maxGauge: 10, // フィーバーゲージが最大になる右スワイプ回数
+        duration: 60000, // フィーバー持続時間 (ミリ秒, 1分)
+        stickerPaths: [
             'images/stickers/1.png', 'images/stickers/2.png', 'images/stickers/3.png',
             'images/stickers/4.png', 'images/stickers/5.png', 'images/stickers/6.png',
             'images/stickers/7.png', 'images/stickers/8.png', 'images/stickers/9.png',
@@ -109,40 +117,38 @@ const config = {
             'images/stickers/16.png', 'images/stickers/17.png', 'images/stickers/18.png',
             'images/stickers/19.png'
         ],
-        stickerInterval: 500, // ステッカーが新しく出現する間隔 (ミリ秒) (新規追加)
-        maxStickersOnScreen: 5, // 画面上に同時に表示されるステッカーの最大数 (新規追加)
-        gaugeColor: null, // フィーバーゲージの色を固定したい場合 (例: '#FFD700')。nullならメンバーカラーかアクセントカラー。
+        stickerInterval: 500, // スタンプが新しく出現する間隔 (ミリ秒)
+        maxStickersOnScreen: 5, // 画面上に同時に表示されるステッカーの最大数
+        gaugeColor: null, // フィーバー中のゲージの色を固定したい場合 (例: '#FFD700')。nullならメンバーカラーかアクセントカラー。
     },
 
     // スワイプ操作とカードUI設定
     swipe: {
-        thresholdRatio: 0.25, // スワイプ判定する画面横幅に対する移動量の閾値 (新規追加)
-        rotationFactor: 0.05, // ドラッグ量に応じたカードの傾き係数 (新規追加)
-        animationSpeed: 300, // カードが画面外に飛ぶアニメーションの時間 (ミリ秒) (新規追加)
-        likeOverlayPath: 'images/like_overlay.png', // 右スワイプ時評価画像 (以前の likeImageSrc, ファイル名変更推奨)
-        nopeOverlayPath: 'images/nope_overlay.png',   // 左スワイプ時評価画像 (以前の nopeImageSrc, ファイル名変更推奨)
+        thresholdRatio: 0.25, // スワイプ判定する画面横幅に対する移動量の閾値
+        rotationFactor: 0.05, // ドラッグ量に応じたカードの傾き係数
+        animationSpeed: 300, // カードが画面外に飛ぶアニメーションの時間 (ミリ秒)
+        likeOverlayPath: 'images/like_overlay.png',
+        nopeOverlayPath: 'images/nope_overlay.png',
     },
     ui: {
-        maxCardsInStack: 3, // 画面に表示するカードの最大枚数 (表示中1枚 + 裏に準備2枚など) (新規追加)
-        preloadNextCardCount: 2, // 次のカードを何枚事前に画像URLだけ読み込んでおくか (以前の nextCardPreloadCount)
+        maxCardsInStack: 4, // 画面に表示するカードの最大枚数 (スタック表示対応)
+        preloadNextCardCount: 3, // 次に表示する可能性のあるカードの画像プリロード数 (スタック枚数-1程度)
     },
 
     // データ関連設定
     data: {
-        serifCsvPath: 'data/ONSP_セリフ.csv', // (以前の DATA_FILES.serifCsvPath)
-        csvTagSeparator: '|', // セリフCSV内のタグ区切り文字 (以前の DATA_FILES.quoteTagDelimiter)
+        serifCsvPath: 'data/serifs.csv', // ★ファイル名を serif_onsp.csv や ONSP_セリフ.csv に戻すか確認
+        csvTagSeparator: '|', // セリフCSV内のタグ区切り文字
+        csvFieldSeparator: ',', // CSVのフィールド区切り文字 (デフォルトはカンマ)
     },
 
     // localStorage キー
     localStorageKeys: {
-        memberWeights: 'onspTinderAppMemberWeights_v1', // メンバー出現率 (新規または以前の settings)
-        feverLikedImages: 'onspTinderAppLikedImages_v1', // 右スワイプした画像の履歴 (以前の likedImages)
-        // 必要に応じて以前の STORAGE_KEYS から他のキーも移行・追加
-        // settings: 'onspTinderAppSettings_v1',
-        // weakPoints: 'onspTinderAppWeakPoints_v1',
+        memberWeights: 'onspTinderAppMemberWeights_v1',
+        feverLikedImages: 'onspTinderAppLikedImages_v1',
     },
 
     // その他設定
-    defaultMemberWeight: 1, // 各メンバーの初期出現率の重み (新規追加)
-    DEBUG_MODE: true, // (以前の DEBUG_MODE)
+    defaultMemberWeight: 1, // 各メンバーの初期出現率の重み
+    DEBUG_MODE: true,
 };
