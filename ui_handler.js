@@ -1,4 +1,4 @@
-// ui_handler.js (全文・フィーバー演出対応版)
+// ui_handler.js (全文・スタンプ演出調整版)
 
 class UIHandler {
     constructor(config) {
@@ -9,22 +9,19 @@ class UIHandler {
         this.settingsModalOverlay = document.getElementById('settingsModalOverlay');
         this.memberWeightsSettingsDiv = document.getElementById('memberWeightsSettings');
 
-        this.cardElements = []; // 現在画面に表示されているカードDOM要素の配列
-        this.MAX_CARDS_IN_STACK = 4; // 常に表示するカードの枚数
+        this.cardElements = [];
+        this.MAX_CARDS_IN_STACK = 4;
         this.currentFeverGaugeValue = 0;
 
-        // ★ スタンプ表示用コンテナをbody直下に追加
         this.stickerContainer = document.createElement('div');
         this.stickerContainer.classList.add('sticker-container');
         document.body.appendChild(this.stickerContainer);
-
 
         if (!this.cardStackArea) {
             console.error("要素 .card-stack-area が見つかりません。");
         }
     }
 
-    // ★ フィーバーモード時のUI変更用メソッド
     setFeverModeUI(isFever) {
         if (isFever) {
             document.body.classList.add('fever-mode-active');
@@ -33,137 +30,132 @@ class UIHandler {
         }
     }
 
-    // ★ スタンプ追加メソッド
-    addSticker(imagePath, stickerId) {
+    addSticker(imagePath, stickerId, member) { // member オブジェクトを受け取る
         if (!this.stickerContainer) return;
 
         const img = document.createElement('img');
         img.src = imagePath;
         img.classList.add('fever-sticker');
-        // img.style.position = 'fixed'; // CSSで指定済みのはず
-        // img.style.zIndex = 150; // CSSで指定済みのはず
-        // img.style.pointerEvents = 'none'; // CSSで指定済みのはず
+        img.style.position = 'fixed'; // CSSで管理するが、念のため
+        img.style.zIndex = '150';     // CSSで管理するが、念のため
+        img.style.pointerEvents = 'none'; // CSSで管理するが、念のため
 
-        // ランダムな初期位置、サイズ、回転をCSS側のアニメーションに任せるか、JSで一部制御
-        // CSSの @keyframes で多様な動きを定義し、それをランダムに適用するのも良い
-        // ここでは基本的な出現位置をランダムにする例
-        const side = Math.random() < 0.5 ? 'left' : 'right';
-        const topPosition = Math.random() * 70 + 15; // 15% から 85% の高さ
+        // ランダムな初期位置 (画面内に収まるように少し調整)
+        const startX = Math.random() * 70 + 15; // 左右15%〜85%の位置
+        const startY = Math.random() * 60 + 20; // 上下20%〜80%の位置
+        img.style.left = `${startX}vw`;
+        img.style.top = `${startY}vh`;
+        img.style.transform = `translate(-50%, -50%) scale(${0.7 + Math.random() * 0.5})`; // ランダムな初期スケール
 
-        if (side === 'left') {
-            img.style.left = `${Math.random() * 20 - 10}%`; // -10% から 10% (画面左端付近)
-        } else {
-            img.style.right = `${Math.random() * 20 - 10}%`; // -10% から 10% (画面右端付近)
+        img.dataset.stickerId = stickerId;
+
+        // メンバー情報を元にスタイルを設定
+        if (member && member.id && member.color) {
+            img.dataset.memberId = member.id; // デバッグや特定のJS処理用
+            // CSSカスタムプロパティ '--member-color-hue' を設定 (色相計算が必要)
+            // 簡単な例として、メンバーカラーのHEXをそのまま渡す (CSS側での処理は限定的)
+            // img.style.setProperty('--member-color-raw', member.color);
+
+            // メンバーカラーからHSLの色相(hue)を計算して設定する (より高度な方法)
+            // この計算は複雑なので、ここでは固定の色相オフセットで代用するか、
+            // config.jsに各メンバーの色相値を定義しておくのが現実的
+            // 例: img.style.filter = `hue-rotate(${member.hueOffset || 0}deg)`;
+
+            // アヤカの場合の特別処理用のクラス
+            if (member.name === 'アヤカ') { // config.js の name と比較
+                img.classList.add('ayaka-sticker');
+            } else {
+                // アヤカ以外の場合、メンバーカラーに応じた色相回転を試みる
+                // ★注意: CSSの filter: hue-rotate(var(--member-color-hue)) のような使い方をするには、
+                // JavaScript側でメンバーカラー(HEX)から色相(deg)を計算してCSSカスタムプロパティで渡すか、
+                // 各メンバーごとにCSSクラスを作ってhue-rotate値を設定する必要があります。
+                // ここではCSS側で :not(.ayaka-sticker) に対してデフォルトのフィルターを設定し、
+                // もしCSSカスタムプロパティ `--member-color-raw` を使うなら、
+                // CSS側で `filter: hue-rotate(angle-from-color(var(--member-color-raw)))` のようなことは直接できない。
+                // JSで `--hue-offset` を設定するのが一つの方法。
+                // 以下は仮のランダムな色相回転（デモ用）
+                // img.style.filter = `hue-rotate(${Math.random() * 360}deg) saturate(1.2)`;
+                 img.style.setProperty('--original-hue', '0deg'); //基準（JSでメンバーカラーから計算して設定するべき箇所）
+                 img.style.setProperty('--member-color-filter-hue', member.hueOffsetForSticker || '0deg'); // configに定義想定
+            }
         }
-        img.style.top = `${topPosition}%`;
 
-        // ランダムなアニメーション遅延や向きなどを設定することも可能
-        img.style.animationDelay = `${Math.random() * 0.5}s`;
-        // メンバーカラーに合わせて色相を回転 (CSSカスタムプロパティを使う)
-        // 現在アクティブなカードのメンバーカラーを取得する必要がある
-        if (this.cardElements.length > 0 && this.cardElements[0] && this.cardElements[0].style.getPropertyValue('--member-color')) {
-            const memberColor = this.cardElements[0].style.getPropertyValue('--member-color');
-            // メンバーカラーからhueを計算するのは複雑なので、
-            // ここでは仮にフィルターをかける (より正確にはconfigの色から計算)
-            // 例: img.style.filter = `hue-rotate(${Math.random() * 360}deg) saturate(1.5)`;
-            // 今回はCSS側でアニメーションさせるので、JSでの直接的な色相変更は一旦保留
-            // もしやるなら、data-member-color 属性をスタンプに付与し、CSSで参照する
-        }
-
-
-        img.dataset.stickerId = stickerId; // アニメーション後の削除管理用
 
         this.stickerContainer.appendChild(img);
 
-        // アニメーション終了後に要素を削除 (CSSアニメーションの duration と一致させる)
-        // CSSのanimation-durationが3sの場合
-        img.addEventListener('animationend', () => {
-            if (img.parentNode) {
-                img.parentNode.removeChild(img);
-            }
-            // FeverHandlerのactiveStickersからもIDを削除する必要があるかもしれないが、
-            // FeverHandler側でタイムアウトで管理しているので、ここではDOM削除のみ
-        }, { once: true }); // イベントリスナーを一度だけ実行
+        // 1. すぐに表示 (opacity 1へ)
+        img.style.opacity = '0'; // 初期状態
+        requestAnimationFrame(() => { // 描画サイクル後でないとtransitionが効かない場合がある
+            img.style.transition = 'opacity 0.3s ease-in';
+            img.style.opacity = '1';
+        });
+
+
+        // 2. 約1秒後から点滅アニメーションを開始
+        const flickerTimerId = setTimeout(() => {
+            img.classList.add('flicker');
+        }, 1000); // 1秒後に点滅開始
+
+        // 3. 表示開始から約4秒後 (出現0.3s + 滞在0.7s + 点滅3s) に消し始める
+        const fadeOutTimerId = setTimeout(() => {
+            img.classList.remove('flicker'); // 点滅を止める
+            img.style.transition = 'opacity 0.5s ease-out'; // ゆっくり消える
+            img.style.opacity = '0';
+
+            // 4. 完全に消えた後にDOMから削除
+            setTimeout(() => {
+                if (img.parentNode) {
+                    img.parentNode.removeChild(img);
+                }
+                // FeverHandlerのactiveStickersCountを減らす
+                if (window.feverHandlerInstance && typeof window.feverHandlerInstance.decrementStickerCount === 'function') {
+                    window.feverHandlerInstance.decrementStickerCount();
+                }
+            }, 500); // opacityのtransition時間
+        }, 1000 + 3000); // 出現アニメーション後、1秒滞在し、3秒点滅 = 合計4秒後に消し始め
+
+        // animationendは使わず、setTimeoutで制御する
     }
 
-    // ★ 表示中のスタンプを全てクリアするメソッド
     clearStickers() {
         if (this.stickerContainer) {
-            this.stickerContainer.innerHTML = '';
+            this.stickerContainer.innerHTML = ''; // すべてのスタンプをDOMから削除
+        }
+        // FeverHandlerのアクティブなスタンプ数をリセット
+        if (window.feverHandlerInstance && typeof window.feverHandlerInstance.resetStickerCount === 'function') {
+            window.feverHandlerInstance.resetStickerCount();
         }
     }
 
-
     createCardElement(cardData) {
-        const cardDiv = document.createElement('div');
-        cardDiv.classList.add('card');
-        if (cardData && cardData.member) {
-            cardDiv.dataset.memberId = cardData.member.id;
-            cardDiv.style.setProperty('--member-color', cardData.member.color || '#888');
-        }
-
-        const imageContainer = document.createElement('div');
-        imageContainer.classList.add('image-container');
-        const img = document.createElement('img');
-        img.classList.add('main-image');
-        img.alt = cardData.member ? cardData.member.name : 'Card Image';
-
+        const cardDiv = document.createElement('div'); cardDiv.classList.add('card');
+        if (cardData && cardData.member) { cardDiv.dataset.memberId = cardData.member.id; cardDiv.style.setProperty('--member-color', cardData.member.color || '#888'); }
+        const imageContainer = document.createElement('div'); imageContainer.classList.add('image-container');
+        const img = document.createElement('img'); img.classList.add('main-image'); img.alt = cardData.member ? cardData.member.name : 'Card Image';
         img.onload = () => {
-            const naturalWidth = img.naturalWidth; const naturalHeight = img.naturalHeight;
-            const imageAspectRatio = naturalWidth / naturalHeight;
-            const cardDisplayAreaAspectRatio = 340 / 520; 
-
-            imageContainer.className = 'image-container'; 
-            img.style.objectFit = 'contain'; img.style.width = 'auto'; img.style.height = 'auto';
-
+            const naturalWidth = img.naturalWidth; const naturalHeight = img.naturalHeight; const imageAspectRatio = naturalWidth / naturalHeight;
+            const cardDisplayAreaAspectRatio = 340 / 520; /* 仮 */ imageContainer.className = 'image-container'; img.style.objectFit = 'contain'; img.style.width = 'auto'; img.style.height = 'auto';
             if (naturalHeight > naturalWidth) { imageContainer.classList.add('image-aspect-portrait-cover'); }
-            else {
-                if (imageAspectRatio < 1.1 && imageAspectRatio > 0.9) { imageContainer.classList.add('image-aspect-square-pillarbox', 'bg-white'); }
-                else if (imageAspectRatio > cardDisplayAreaAspectRatio) { imageContainer.classList.add('image-aspect-landscape-letterbox', 'bg-black'); }
-                else { imageContainer.classList.add('image-aspect-landscape-letterbox', 'bg-black'); }
-            }
+            else { if (imageAspectRatio < 1.1 && imageAspectRatio > 0.9) { imageContainer.classList.add('image-aspect-square-pillarbox', 'bg-white'); } else if (imageAspectRatio > cardDisplayAreaAspectRatio) { imageContainer.classList.add('image-aspect-landscape-letterbox', 'bg-black'); } else { imageContainer.classList.add('image-aspect-landscape-letterbox', 'bg-black'); } }
         };
-        img.onerror = () => { img.src = 'images/placeholder.png'; };
-        img.src = cardData.imagePath;
-
-        imageContainer.appendChild(img);
-        cardDiv.appendChild(imageContainer);
-
-        if (cardData.member && cardData.serif) {
-            const infoDiv = document.createElement('div'); infoDiv.classList.add('card-info');
-            const memberDetailsDiv = document.createElement('div'); memberDetailsDiv.classList.add('member-details');
-            const quoteP = document.createElement('p'); quoteP.classList.add('member-quote'); quoteP.textContent = cardData.serif;
-            memberDetailsDiv.appendChild(quoteP);
-            if (memberDetailsDiv.hasChildNodes()) { infoDiv.appendChild(memberDetailsDiv); }
-            if (infoDiv.hasChildNodes()) { cardDiv.appendChild(infoDiv); }
-        }
-
+        img.onerror = () => { img.src = 'images/placeholder.png'; }; img.src = cardData.imagePath;
+        imageContainer.appendChild(img); cardDiv.appendChild(imageContainer);
+        if (cardData.member && cardData.serif) { const infoDiv = document.createElement('div'); infoDiv.classList.add('card-info'); const memberDetailsDiv = document.createElement('div'); memberDetailsDiv.classList.add('member-details'); const quoteP = document.createElement('p'); quoteP.classList.add('member-quote'); quoteP.textContent = cardData.serif; memberDetailsDiv.appendChild(quoteP); if (memberDetailsDiv.hasChildNodes()) { infoDiv.appendChild(memberDetailsDiv); } if (infoDiv.hasChildNodes()) { cardDiv.appendChild(infoDiv); } }
         const likeOverlay = document.createElement('img'); likeOverlay.src = this.config.swipe?.likeOverlayPath || 'images/like_overlay.png'; likeOverlay.classList.add('swipe-overlay', 'like-overlay'); likeOverlay.style.display = 'none'; cardDiv.appendChild(likeOverlay);
         const nopeOverlay = document.createElement('img'); nopeOverlay.src = this.config.swipe?.nopeOverlayPath || 'images/nope_overlay.png'; nopeOverlay.classList.add('swipe-overlay', 'nope-overlay'); nopeOverlay.style.display = 'none'; cardDiv.appendChild(nopeOverlay);
         return cardDiv;
     }
-
     updateCardStack(cardDataArray) {
-        if (!this.cardStackArea) return;
-        this.cardStackArea.innerHTML = ''; this.cardElements = [];
+        if (!this.cardStackArea) return; this.cardStackArea.innerHTML = ''; this.cardElements = [];
         if (!cardDataArray || cardDataArray.length === 0) { this.showNoMoreCardsMessage(); return; }
         for (let i = 0; i < Math.min(cardDataArray.length, this.MAX_CARDS_IN_STACK); i++) {
             const cardData = cardDataArray[i]; if (!cardData) continue;
-            const cardElement = this.createCardElement(cardData);
-            this.cardElements.push(cardElement); this.cardStackArea.appendChild(cardElement);
-            cardElement.className = 'card'; 
-            cardElement.classList.add(`card-${i}`);
-            if (i === 0) {
-                document.dispatchEvent(new CustomEvent('cardElementReady', { detail: { cardElement, cardData } }));
-                if(cardData.member) {
-                    this.updateStoryProgressBar(cardData.member, cardData.currentImageIndex, cardData.totalImagesInMember);
-                    this.updateFeverGauge(this.currentFeverGaugeValue || 0, cardData.member.color);
-                }
-            }
+            const cardElement = this.createCardElement(cardData); this.cardElements.push(cardElement); this.cardStackArea.appendChild(cardElement);
+            cardElement.className = 'card'; cardElement.classList.add(`card-${i}`);
+            if (i === 0) { document.dispatchEvent(new CustomEvent('cardElementReady', { detail: { cardElement, cardData } })); if(cardData.member) { this.updateStoryProgressBar(cardData.member, cardData.currentImageIndex, cardData.totalImagesInMember); this.updateFeverGauge(this.currentFeverGaugeValue || 0, cardData.member.color); } }
         }
         if (this.cardElements.length === 0) { this.showNoMoreCardsMessage(); }
     }
-
     moveCardDuringSwipe(cardElement, deltaX, deltaY, rotation) { if (!cardElement) return; cardElement.classList.add('dragging-card'); cardElement.style.transform = `translate(${deltaX}px, ${deltaY}px) rotate(${rotation}deg)`; }
     toggleSwipeOverlay(cardElement, swipeDirection) { if (!cardElement) return; const likeOverlay = cardElement.querySelector('.like-overlay'); const nopeOverlay = cardElement.querySelector('.nope-overlay'); if (likeOverlay) { likeOverlay.style.display = swipeDirection === 'like' ? 'block' : 'none'; if (swipeDirection === 'like') likeOverlay.classList.add('visible'); else likeOverlay.classList.remove('visible'); } if (nopeOverlay) { nopeOverlay.style.display = swipeDirection === 'nope' ? 'block' : 'none'; if (swipeDirection === 'nope') nopeOverlay.classList.add('visible'); else nopeOverlay.classList.remove('visible'); } }
     animateCardOut(cardElement, direction, onComplete) { if (!cardElement) return; cardElement.classList.remove('dragging-card'); const moveX = direction === 'right' ? window.innerWidth * 1.2 : -window.innerWidth * 1.2; const rotation = direction === 'right' ? 45 : -45; cardElement.style.transition = `transform ${this.config.swipe.animationSpeed || 300}ms ease-in`; cardElement.style.transform = `translate(${moveX}px, ${Math.random() * 100 - 50}px) rotate(${rotation}deg)`; cardElement.style.opacity = '0'; setTimeout(() => { if (onComplete) onComplete(); }, this.config.swipe.animationSpeed || 300); }
