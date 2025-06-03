@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>ONSP カードスワイプ</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="progress-area">
+            <div class="story-progress-bar">
+                </div>
+            <div class="fever-gauge-container">
+                <div class="fever-gauge"></div>
+                <span>FEVER</span>
+            </div>
+        </div>
+
+        <div class="card-stack-area">
+            </div>
+
+        <button class="settings-button" id="settingsButton">
+            ⚙️ </button>
+
+        <div class="modal-overlay" id="settingsModalOverlay" style="display: none;">
+            <div class="modal-content">
+                <h2>設定</h2>
+                <div id="memberWeightsSettings">
+                    </div>
+                <button id="saveSettingsButton">保存</button>
+                <button id="closeSettingsModalButton">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="data_provider.js"></script>
+    <script src="ui_handler.js"></script>
+    <script src="fever_handler.js"></script>
+    <script src="card_manager.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
