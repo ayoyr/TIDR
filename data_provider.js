@@ -1,4 +1,4 @@
-// data_provider.js (画像パス収集メソッドgetAllImagePathsToPreload追加版・全文)
+// DataProvider.js (全文・高評価画像リスト対応追加版)
 
 class DataProvider {
     constructor(config) {
@@ -6,6 +6,7 @@ class DataProvider {
         this.userSettings = this.loadUserSettings();
         this.members = this.parseMembers(config.members);
         this.serifsByMember = {};
+        this.likedImages = this.loadLikedImages(); // 高評価画像を読み込む
     }
 
     parseMembers(memberConfigs) {
@@ -213,15 +214,11 @@ class DataProvider {
         }
     }
 
-    /**
-     * アプリケーションで使用する全ての画像パスを収集する
-     * @returns {string[]} 画像パスの配列
-     */
     getAllImagePathsToPreload() {
         const imagePaths = new Set();
         if (this.members && this.members.length > 0) {
             this.members.forEach(member => {
-                if (member.profileIcon) {
+                if (member.profileIcon) { // プロフィールアイコンも対象に (もし表示するなら)
                     imagePaths.add(member.profileIcon);
                 }
                 if (member.imageFolders && member.imageFolders.hutuu && member.imageFolders.hutuu.path && member.imageFolders.hutuu.imageCount > 0) {
@@ -251,12 +248,58 @@ class DataProvider {
                 imagePaths.add(this.config.swipe.nopeOverlayPath);
             }
         }
-        imagePaths.add('images/placeholder.png');
+        imagePaths.add('images/placeholder.png'); // プレースホルダーも読み込んでおく
         console.log(`Total unique images to preload: ${imagePaths.size}`);
         return Array.from(imagePaths);
     }
 
+    // 高評価画像リスト関連のメソッド
+    loadLikedImages() {
+        const storedLikedImages = localStorage.getItem(this.config.localStorageKeys.feverLikedImages);
+        if (storedLikedImages) {
+            try {
+                const images = JSON.parse(storedLikedImages);
+                return Array.isArray(images) ? images : [];
+            } catch (e) {
+                console.error("localStorageから高評価画像の読み込みに失敗しました:", e);
+                return [];
+            }
+        }
+        return [];
+    }
+
+    addLikedImage(cardData) {
+        if (!cardData || !cardData.member || !cardData.imagePath) return;
+
+        const likedImageInfo = {
+            memberId: cardData.member.id,
+            memberName: cardData.member.name,
+            imagePath: cardData.imagePath,
+            timestamp: Date.now()
+        };
+
+        if (!this.likedImages.some(img => img.imagePath === likedImageInfo.imagePath)) {
+            this.likedImages.push(likedImageInfo);
+            this.saveLikedImages();
+            console.log("高評価画像を追加:", likedImageInfo.imagePath);
+        }
+    }
+
+    saveLikedImages() {
+        try {
+            localStorage.setItem(this.config.localStorageKeys.feverLikedImages, JSON.stringify(this.likedImages));
+        } catch (e) {
+            console.error("高評価画像のlocalStorageへの保存に失敗しました:", e);
+        }
+    }
+
+    getLikedImages() {
+        return this.likedImages;
+    }
+
+
     async loadAllData() {
+        this.likedImages = this.loadLikedImages(); // likedImagesも初期ロード時に読み込む
         await this.loadSerifs();
         console.log("DataProvider: 全データの読み込み処理が完了しました。");
     }
