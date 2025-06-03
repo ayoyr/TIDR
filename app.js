@@ -1,4 +1,4 @@
-// app.js (全文・フィーバー対応・カードスタック対応版)
+// App.js (全文・フィーバー演出UI呼び出し対応版)
 
 document.addEventListener('DOMContentLoaded', () => {
     const loadingScreen = document.getElementById('loadingScreen');
@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- アプリケーション初期化処理 ---
     async function initializeApp() {
-        console.log("ONSP App Initializing with Preload, Card Stack & Fever...");
+        console.log("ONSP App Initializing with Preload, Card Stack & Fever演出...");
 
         // 0. 全画像パスを取得してプリロード
         const allImagePaths = dataProvider.getAllImagePathsToPreload();
@@ -179,13 +179,17 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('feverModeStarted', async () => {
             console.log("App.js: Fever Mode Started!");
             cardManager.setFeverMode(true); // CardManagerにフィーバーモードであることを通知
-            // uiHandler.setFeverModeUI(true); // UIにフィーバーモード専用のスタイルを適用する場合
+            uiHandler.setFeverModeUI(true); // UIにフィーバーモードであることを通知 (背景変更など)
 
             await cardManager.initializeCardStack(); // フィーバーモード用にスタックを再初期化
             if (cardManager.cardStackData.length > 0 && cardManager.cardStackData[0] && cardManager.cardStackData[0].member) {
                 const feverTopCardMember = cardManager.cardStackData[0].member;
-                uiHandler.updateAppBackground(feverTopCardMember.color);
-                // フィーバー中のゲージの初期色を更新 (FeverHandler内でも制御しているが、UI同期のため)
+                // フィーバーモード中は背景色を固定にするか、カードのメンバーカラーにするか選択
+                // uiHandler.updateAppBackground(feverTopCardMember.color); // 通常通りカードのメンバーカラー
+                // または uiHandler.updateAppBackground(config.fever.backgroundColor || '#111'); // フィーバー専用背景色
+                // 現在はCSSの body.fever-mode-active で背景色を固定にしているので、updateAppBackgroundは不要かも
+                
+                // フィーバー中のゲージの初期色を更新（FeverHandler内でも制御しているが、UI同期のため）
                 uiHandler.updateFeverGauge(100, config.fever.gaugeColor || '#FFD700'); // フィーバー中は最大＆特別色
             } else if (cardManager.cardStackData.length === 0) {
                  console.warn("フィーバーモードで表示するカードがありません。");
@@ -197,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('feverModeEnded', async () => {
             console.log("App.js: Fever Mode Ended!");
             cardManager.setFeverMode(false); // CardManagerに通常モードに戻ったことを通知
-            // uiHandler.setFeverModeUI(false); // UIのフィーバーモード専用スタイルを解除
+            uiHandler.setFeverModeUI(false); // UIのフィーバーモード専用スタイルを解除
 
             await cardManager.initializeCardStack(); // 通常モード用にスタックを再初期化
             if (cardManager.cardStackData.length > 0 && cardManager.cardStackData[0] && cardManager.cardStackData[0].member) {
