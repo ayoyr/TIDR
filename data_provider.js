@@ -1,27 +1,25 @@
-// data_provider.js - データソースの管理 (セリフ読み込み対応・全文)
+// data_provider.js (全文・CSVヘッダーなし対応・エラー対策強化版)
 
 class DataProvider {
     constructor(config) {
         this.config = config;
         this.userSettings = this.loadUserSettings(); // membersパースより先に実行してweightの初期値に使う
-        this.members = this.parseMembers(config.members);
+        this.members = this.parseMembers(config.members); // ここで this.members が初期化される
         this.serifsByMember = {}; // メンバー名ごとにセリフを格納するオブジェクト
     }
 
     // configからメンバー情報を扱いやすい形に初期化
     parseMembers(memberConfigs) {
         if (!memberConfigs || memberConfigs.length === 0) {
-            console.error("メンバー情報がconfig.jsに設定されていません。");
-            return [];
+            console.error("config.jsにメンバー情報 (config.members) が設定されていないか空です。");
+            return []; // 空の配列を返す
         }
         return memberConfigs.map(member => ({
             id: member.id,
             name: member.name,
             color: member.color,
             profileIcon: member.profileIcon,
-            imageFolders: member.imageFolders, // eroとhutuuのパスと枚数
-            // 初期出現率の重みを設定 (設定モーダルで変更可能にする想定)
-            // loadUserSettingsを先に呼んでいるので、ここでの読み込みは不要になる
+            imageFolders: member.imageFolders,
             weight: this.userSettings?.memberWeights?.[member.id] !== undefined ?
                     this.userSettings.memberWeights[member.id] :
                     (this.config.defaultMemberWeight !== undefined ? this.config.defaultMemberWeight : 1),
@@ -46,9 +44,9 @@ class DataProvider {
     // 特定メンバーの指定タイプ(ero/hutuu)の画像パスリストを取得
     getMemberImagePaths(memberId, imageType = 'ero') {
         const member = this.getMemberById(memberId);
-        if (!member || !member.imageFolders[imageType]) {
-            console.warn(`メンバーID "${memberId}" または画像タイプ "${imageType}" の情報が見つかりません。`);
-            return ['images/placeholder.png']; // 安全のためプレースホルダーを返す
+        if (!member || !member.imageFolders || !member.imageFolders[imageType]) {
+            console.warn(`メンバーID "${memberId}" または画像タイプ "${imageType}" の情報が見つかりません (member or imageFolders or imageType invalid)。`);
+            return ['images/placeholder.png'];
         }
 
         const folderInfo = member.imageFolders[imageType];
@@ -56,14 +54,12 @@ class DataProvider {
         const count = folderInfo.imageCount;
         const paths = [];
 
-        if (count === 0) {
-            // imageCountが0の場合もプレースホルダーを返す
-            console.warn(`メンバー ${member.name} (${memberId}) の ${imageType} 画像枚数が0です。placeholderを表示します。`);
+        if (typeof count !== 'number' || count === 0) {
+            console.warn(`メンバー ${member.name} (${memberId}) の ${imageType} 画像枚数 (imageCount) が0または不正です。placeholderを表示します。`);
             return ['images/placeholder.png'];
         }
 
         for (let i = 1; i <= count; i++) {
-            // 画像ファイル名は 1.jpg, 2.jpg ... と想定
             paths.push(`${basePath}${i}.jpg`);
         }
         return paths;
@@ -78,15 +74,13 @@ class DataProvider {
         const memberSerifs = this.serifsByMember[member.name];
         if (memberSerifs && memberSerifs.length > 0) {
             const randomIndex = Math.floor(Math.random() * memberSerifs.length);
-            return memberSerifs[randomIndex].quote; // quoteプロパティを返す
+            return memberSerifs[randomIndex].quote;
         }
-        // CSVにセリフがない、またはまだ読み込まれていない場合のフォールバック
         return `${member.name}のセリフは準備中です。`;
     }
 
     // --- ユーザー設定関連 ---
     loadUserSettings() {
-        // localStorageから読み込む想定
         const storedWeights = localStorage.getItem(this.config.localStorageKeys.memberWeights);
         let memberWeights = {};
         if (storedWeights) {
@@ -105,13 +99,14 @@ class DataProvider {
     saveMemberWeights(weights) {
         try {
             localStorage.setItem(this.config.localStorageKeys.memberWeights, JSON.stringify(weights));
-            // this.members にも即座に反映
-            this.members.forEach(member => {
-                if (weights[member.id] !== undefined) {
-                    member.weight = parseInt(weights[member.id], 10); // 数値型で保存
-                }
-            });
-            this.userSettings.memberWeights = weights; // 内部状態も更新
+            if (this.members && typeof this.members.forEach === 'function') {
+                this.members.forEach(member => {
+                    if (weights[member.id] !== undefined) {
+                        member.weight = parseInt(weights[member.id], 10);
+                    }
+                });
+            }
+            this.userSettings.memberWeights = weights;
             console.log("メンバー出現率を保存しました:", weights);
         } catch (e) {
             console.error("メンバー出現率のlocalStorageへの保存に失敗しました:", e);
@@ -124,61 +119,46 @@ class DataProvider {
             const response = await fetch(this.config.data.serifCsvPath);
             if (!response.ok) {
                 console.error(`セリフCSVの読み込みに失敗: ${this.config.data.serifCsvPath} - ${response.status} ${response.statusText}`);
-                this.generateDummySerifsForAllMembers(); // ダミーセリフを生成
+                this.generateDummySerifsForAllMembers();
                 return;
             }
             const csvData = await response.text();
-            this.parseSerifCsv(csvData);
-            console.log("セリフデータを読み込み、パースしました。");
+            this.parseSerifCsv(csvData); // パース処理を呼び出す
+            console.log("セリフデータを読み込み、パース処理を試みました。");
         } catch (error) {
             console.error(`セリフCSV (${this.config.data.serifCsvPath}) の読み込み中にネットワークエラー等が発生しました:`, error);
-            this.generateDummySerifsForAllMembers(); // エラー時もダミーセリフを生成
+            this.generateDummySerifsForAllMembers();
         }
     }
 
-    // CSV文字列をパースしてメンバーごとにセリフを格納する
+    // CSV文字列をパースしてメンバーごとにセリフを格納する (ヘッダーなしCSV対応版)
     parseSerifCsv(csvData) {
         this.serifsByMember = {}; // 初期化
-        const lines = csvData.split(/\r?\n/); // 改行コードCRLFとLF両方に対応
+        const lines = csvData.split(/\r?\n/);
 
-        if (lines.length === 0) {
-            console.warn("セリフCSVファイルが空です。");
-            this.generateDummySerifsForAllMembers();
+        if (lines.length === 0 || (lines.length === 1 && lines[0].trim() === '')) {
+            console.warn("セリフCSVファイルが空か、内容がありません。");
+            this.generateDummySerifsForAllMembers(); // ダミー生成
             return;
         }
 
-        const headerLine = lines.shift(); // ヘッダー行を取り出す
-        if (!headerLine) {
-            console.warn("セリフCSVファイルにヘッダー行がありません。");
-            this.generateDummySerifsForAllMembers();
-            return;
-        }
-        // ヘッダーをパース (簡易的にカンマ区切り)
-        const header = headerLine.split(',').map(h => h.trim());
-        const memberNameIndex = header.indexOf('MemberName');
-        const quoteIndex = header.indexOf('Quote');
-        const tagsIndex = header.indexOf('Tags'); // オプショナル
+        // 列のインデックスを固定値として定義 (0から始まる)
+        const memberNameIndex = 0; // 1列目がメンバー名
+        const quoteIndex = 1;      // 2列目がセリフ
+        const tagsIndex = 2;       // 3列目がタグ (この列は存在しなくても良い)
 
-        if (memberNameIndex === -1 || quoteIndex === -1) {
-            console.error("CSVヘッダーに 'MemberName' または 'Quote' が見つかりません。現在のヘッダー:", header);
-            this.generateDummySerifsForAllMembers();
-            return;
-        }
-
-        lines.forEach((line, index) => {
+        lines.forEach((line, lineIndex) => {
             if (line.trim() === '') return; // 空行はスキップ
 
-            // ダブルクォーテーションで囲まれたカンマを考慮したCSV行パーサー
             const values = [];
             let currentField = '';
             let inQuotes = false;
             for (let i = 0; i < line.length; i++) {
                 const char = line[i];
-                if (char === '"' && (i === 0 || line[i-1] !== '\\')) { // エスケープされた"は無視しない簡易版
-                    // 次の文字も " なら "" (エスケープされたダブルクォート) として処理
+                if (char === '"' && (i === 0 || line[i-1] !== '\\')) {
                     if (inQuotes && i + 1 < line.length && line[i+1] === '"') {
                         currentField += '"';
-                        i++; // 次の " をスキップ
+                        i++;
                         continue;
                     }
                     inQuotes = !inQuotes;
@@ -189,65 +169,80 @@ class DataProvider {
                     currentField += char;
                 }
             }
-            values.push(currentField); // 最後のフィールドを追加
+            values.push(currentField);
 
-            if (values.length > Math.max(memberNameIndex, quoteIndex)) {
+            if (values.length > quoteIndex) {
                 const memberName = values[memberNameIndex].trim();
-                let quote = values[quoteIndex]; // トリムは最後に行うか、フィールドごとに
+                let quote = values[quoteIndex];
 
-                // ダブルクォーテーションで囲まれていたら削除 (フィールドの最初と最後のみ)
-                if (quote.startsWith('"') && quote.endsWith('"')) {
-                    quote = quote.substring(1, quote.length - 1);
+                if (typeof quote === 'string') {
+                    if (quote.startsWith('"') && quote.endsWith('"')) {
+                        quote = quote.substring(1, quote.length - 1);
+                    }
+                    quote = quote.replace(/""/g, '"').trim();
+                } else {
+                    quote = ''; // quoteがundefinedやnullの場合、空文字にする
                 }
-                // "" (エスケープされたダブルクォート) を " に置換
-                quote = quote.replace(/""/g, '"');
 
-                const tagsString = (tagsIndex !== -1 && values.length > tagsIndex) ? values[tagsIndex] : '';
+                const tagsString = (values.length > tagsIndex && values[tagsIndex] !== undefined) ? values[tagsIndex] : '';
                 const tags = tagsString ? tagsString.split(this.config.data.csvTagSeparator || '|').map(tag => tag.trim()) : [];
 
                 if (memberName) {
                     if (!this.serifsByMember[memberName]) {
                         this.serifsByMember[memberName] = [];
                     }
-                    this.serifsByMember[memberName].push({ quote: quote.trim(), tags });
+                    this.serifsByMember[memberName].push({ quote, tags });
                 } else {
-                    console.warn(`セリフCSV ${index + 2}行目: MemberNameが空です。`);
+                    console.warn(`セリフCSV ${lineIndex + 1}行目: MemberName (1列目) が空です。`);
                 }
             } else {
-                 console.warn(`セリフCSV ${index + 2}行目: 列の数が不足しています。 Line: "${line}" Values:`, values);
+                 console.warn(`セリフCSV ${lineIndex + 1}行目: 列の数が不足しています (メンバー名とセリフの2列は必須)。 Line: "${line}"`);
             }
         });
 
         // セリフが一つも読み込めなかったメンバーにダミーセリフを割り当てる
-        this.allMembers.forEach(member => {
-            if (!this.serifsByMember[member.name] || this.serifsByMember[member.name].length === 0) {
-                 if(!this.serifsByMember[member.name]) this.serifsByMember[member.name] = []; // 配列初期化
-                this.serifsByMember[member.name].push({ quote: `${member.name}さんのセリフがCSVに見つかりませんでした。`, tags: [] });
-                console.warn(`${member.name}さんのセリフがCSVに見つからなかったため、ダミーセリフを設定しました。`)
-            }
-        });
+        if (this.members && typeof this.members.forEach === 'function') {
+            this.members.forEach(member => {
+                if (!this.serifsByMember[member.name] || this.serifsByMember[member.name].length === 0) {
+                     if(!this.serifsByMember[member.name]) {
+                        this.serifsByMember[member.name] = [];
+                     }
+                    const hasDummy = this.serifsByMember[member.name].some(serif => serif.quote.includes("ダミーセリフです"));
+                    if (!hasDummy) {
+                        this.serifsByMember[member.name].push({ quote: `${member.name}さんのセリフがCSVに見つかりませんでした。`, tags: [] });
+                        console.warn(`${member.name}さんのセリフがCSVに見つからなかったため、ダミーセリフを設定しました。`);
+                    }
+                }
+            });
+        } else {
+            console.error("parseSerifCsv (ダミー生成部): this.members が未定義またはforEachをサポートしていません。");
+        }
     }
 
     // 全メンバーにダミーセリフを生成する（CSV読み込み失敗時など）
     generateDummySerifsForAllMembers() {
-        console.warn("全メンバーにダミーセリフを生成します。");
-        this.allMembers.forEach(member => {
-            // 既に何らかのセリフ (空配列含む) があっても上書きしないようにする、または意図的に上書きするかどうか。
-            // ここでは、まだ存在しないメンバーに対してのみ、または強制的にダミーを設定する。
-            if (!this.serifsByMember[member.name]) {
-                this.serifsByMember[member.name] = [];
-            }
-            // ダミーを重複して追加しないように、既にダミーがあるかチェックするのも良い
-            this.serifsByMember[member.name].push({ quote: `${member.name}のダミーセリフです。CSVを確認してください。`, tags: [] });
-        });
+        console.warn("全メンバーにダミーセリフを生成します（generateDummySerifsForAllMembers呼び出し）。");
+        if (this.members && typeof this.members.forEach === 'function') {
+            this.members.forEach(member => {
+                // 既にserifsByMemberにエントリがなくても、ここで作成してダミーを追加
+                if (!this.serifsByMember[member.name]) {
+                    this.serifsByMember[member.name] = [];
+                }
+                // ダミーを重複して追加しないように簡易チェック
+                const hasDummy = this.serifsByMember[member.name].some(serif => serif.quote.includes("ダミーセリフです"));
+                if (!hasDummy) {
+                     this.serifsByMember[member.name].push({ quote: `${member.name}のダミーセリフです。CSVを確認してください。`, tags: [] });
+                }
+            });
+        } else {
+            console.error("generateDummySerifsForAllMembers: this.members が未定義またはforEachをサポートしていません。DataProviderコンストラクタでの初期化を確認してください。");
+        }
     }
 
     // アプリ初期化時に全てのデータを読み込む
     async loadAllData() {
         // メンバー情報はコンストラクタでパース済み
-        // セリフを読み込む
-        await this.loadSerifs();
-        // 他にも読み込むべきデータがあればここに追加 (例: 画像タグ情報など)
-        console.log("DataProvider: All data loaded (or attempted).");
+        await this.loadSerifs(); // セリフを読み込む
+        console.log("DataProvider: 全データの読み込み処理が完了しました。");
     }
 }
