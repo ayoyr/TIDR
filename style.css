@@ -1,0 +1,221 @@
+/* 基本的なリセットと設定 */
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: sans-serif;
+    overflow: hidden; /* スクロールバーを隠す */
+    background-color: #333; /* 初期背景色 (メンバーカラーで動的に変更) */
+    transition: background-color 0.5s ease; /* 背景色変化を滑らかに */
+}
+
+.app-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    max-width: 480px; /* スマートフォン向けに最大幅を設定 */
+    margin: 0 auto;
+    background-color: inherit; /* 親要素の背景色を継承 */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* 上部プログレスエリア */
+.progress-area {
+    padding: 10px 15px;
+    position: relative;
+    z-index: 10;
+}
+
+.story-progress-bar {
+    display: flex;
+    height: 6px;
+    margin-bottom: 8px;
+    gap: 2px; /* セグメント間の隙間 */
+}
+
+.story-progress-bar .segment {
+    flex-grow: 1;
+    background-color: rgba(255, 255, 255, 0.5); /* 半透明白 */
+    border-radius: 3px;
+}
+
+.story-progress-bar .segment.active {
+    background-color: white;
+}
+
+.fever-gauge-container {
+    display: flex;
+    align-items: center;
+    height: 10px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    padding-right: 5px; /* "FEVER"テキストのための余白 */
+}
+
+.fever-gauge {
+    width: 0%; /* 初期値は0% */
+    height: 100%;
+    background-color: #ff4081; /* 仮のフィーバーゲージ色 (メンバーカラー or 固定アクセントカラー) */
+    border-radius: 5px;
+    transition: width 0.3s ease;
+}
+
+.fever-gauge-container span {
+    margin-left: auto; /* "FEVER"テキストを右端に */
+    font-size: 10px;
+    font-weight: bold;
+    color: white;
+    padding-left: 5px;
+}
+
+/* メインカードエリア */
+.card-stack-area {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative; /* カードを重ねるために必要 */
+    padding: 10px; /* カード周囲の余白 */
+    overflow: hidden; /* はみ出したカードを隠す */
+}
+
+.card {
+    width: 90vw; /* 画面幅の90% */
+    max-width: 380px; /* カードの最大幅 */
+    height: 75vh; /* 画面高さの75% */
+    max-height: 600px; /* カードの最大高さ */
+    background-color: #fff;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    position: absolute; /* 重ねて表示するため */
+    overflow: hidden; /* カード内の画像がはみ出ないように */
+    user-select: none; /* テキスト選択を不可に */
+    touch-action: none; /* スワイプ中のブラウザ標準ジェスチャを無効化 */
+    transform-origin: center center; /* 回転の中心 */
+    transition: transform 0.3s ease-out; /* スワイプ後のアニメーション */
+}
+
+.card img.main-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* アスペクト比を保ちつつ全体をカバー */
+    pointer-events: none; /* 画像自体がドラッグイベントを奪わないように */
+}
+
+.card-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 15px;
+    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+    color: white;
+    display: flex;
+    align-items: flex-end; /* 要素を下揃えに */
+}
+
+.profile-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid white; /* メンバーカラーで動的に変更 */
+    margin-right: 10px;
+    object-fit: cover;
+}
+
+.member-details {
+    flex-grow: 1;
+}
+
+.member-name {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.member-quote {
+    font-size: 0.9em;
+    margin-top: 4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* 最大3行で省略 */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* スワイプ時の評価オーバーレイ */
+.swipe-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.5); /* 初期状態は小さく */
+    width: 150px; /* または画像のサイズに合わせる */
+    height: auto;
+    opacity: 0; /* 初期状態は透明 */
+    transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+    pointer-events: none; /* 下のカード操作を妨げないように */
+    z-index: 100; /* カードより手前に */
+}
+.swipe-overlay.visible {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1); /* 表示時に拡大 */
+}
+
+/* 設定ボタン */
+.settings-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.3);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 20;
+}
+
+/* 設定モーダル */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 80%;
+    max-width: 400px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+.modal-content h2 {
+    margin-top: 0;
+}
+.modal-content button {
+    margin-top: 10px;
+    padding: 10px 15px;
+    cursor: pointer;
+}
+
+/* フィーバー中のスタンプ（仮） */
+.fever-sticker {
+    position: absolute;
+    width: 80px; /* ステッカーのサイズ調整 */
+    height: auto;
+    /* アニメーションはJSで動的に設定 */
+    pointer-events: none; /* 操作の邪魔にならないように */
+    z-index: 5; /* カードよりは奥、背景よりは手前 */
+}
