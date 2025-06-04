@@ -63,9 +63,9 @@ const config = {
             name: 'マユカ',
             imageFolders: {
                 hutuu: { path: 'images/mayuka/hutuu/', imageCount: 11 },
-                ero: { path: 'images/マユカ/ero/', imageCount: 32 }
+                ero: { path: 'images/mayuka/ero/', imageCount: 32 }
             },
-            profileIcon: 'images/count/mayuka.jpg', // ★追加
+            profileIcon: 'images/count/マユカ.jpg', // ★追加
             color: '#00ABA9',
             hueOffsetForSticker: '178deg' // ★仮の値
         },
