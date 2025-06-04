@@ -1,4 +1,4 @@
-/* style.css - 全文 (フィーバーエッジエフェクト「ギラギラ」調整版) */
+/* style.css - 全文 (フィーバーエッジエフェクトを常時表示デバッグ版) */
 
 /* 基本的なリセットと設定 */
 body, html {
@@ -137,19 +137,41 @@ body.fever-mode-active {
 }
 .fever-sticker.flicker { animation: flickerAnimation 1s infinite alternate ease-in-out; }
 
-/* フィーバーエッジエフェクトのスタイル */
+/* ★ フィーバーエッジエフェクトのスタイル (常時表示デバッグ版) */
 .fever-edge-effect {
-    position: fixed; top: 0; height: 100vh;
-    width: 15%; max-width: 100px;
-    z-index: 5; display: none; pointer-events: none; overflow: hidden;
+    position: fixed;
+    top: 0;
+    height: 100vh;
+    width: 15%;
+    max-width: 100px;
+    z-index: 5;
+    /* display: none; */ /* ← 初期非表示をコメントアウト */
+    display: block !important; /* ★ 強制的に表示 */
+    opacity: 1 !important; /* ★ 強制的に不透明に (デバッグ用) */
+    background-color: rgba(0, 0, 255, 0.2) !important; /* ★ 確認用に背景色 (デバッグ用) */
+    pointer-events: none;
+    overflow: hidden;
+    animation: continuousHueRotate 8s infinite linear; /* ★ .active クラスなしで常に色相回転 */
 }
-.fever-edge-effect.active {
-    display: block;
-    animation: continuousHueRotate 8s infinite linear;
+/* .fever-edge-effect.active は display:block のためだけだったので、上記で display:block !important にした場合は不要 */
+
+#feverEdgeLeft {
+    left: 0;
 }
-#feverEdgeLeft { left: 0; }
-#feverEdgeRight { right: 0; transform: scaleX(-1); }
-.fever-edge-effect .fever-edge-img { position: absolute; top: 0; left: 0; height: 100%; width: 100%; object-fit: cover; }
+#feverEdgeRight {
+    right: 0;
+    transform: scaleX(-1); /* 右側は反転 */
+}
+.fever-edge-effect .fever-edge-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+}
+
+/* 「ギラギラ」した感じのフェード切り替えアニメーション */
 @keyframes giragiraFade1 {
   0%, 48% { opacity: 1; transform: scale(1.02); }
   50%, 100% { opacity: 0; transform: scale(1); }
@@ -158,8 +180,16 @@ body.fever-mode-active {
   0%, 48% { opacity: 0; transform: scale(1); }
   50%, 100% { opacity: 1; transform: scale(1.02); }
 }
-.fever-edge-effect.active .fever-edge-img.fever-img-1 { animation: giragiraFade1 0.6s infinite linear; }
-.fever-edge-effect.active .fever-edge-img.fever-img-2 { animation: giragiraFade2 0.6s infinite linear; }
+
+/* .active クラスなしで常にアニメーションを適用 */
+.fever-edge-effect .fever-edge-img.fever-img-1 {
+    animation: giragiraFade1 0.6s infinite linear;
+}
+.fever-edge-effect .fever-edge-img.fever-img-2 {
+    animation: giragiraFade2 0.6s infinite linear;
+}
+
+/* 色相回転アニメーション (コンテナに適用) */
 @keyframes continuousHueRotate {
     from { filter: hue-rotate(0deg) brightness(1.1); }
     to { filter: hue-rotate(360deg) brightness(1.1); }
