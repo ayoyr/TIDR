@@ -1,17 +1,62 @@
-/* style.css - 全文 (スタンプアニメーション調整版) */
+/* style.css - 全文 (フィーバーエッジエフェクト追加版) */
 
 /* 基本的なリセットと設定 */
-body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; overflow: hidden; background-color: #333; transition: background-color 0.5s ease; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
-body.fever-mode-active { background-color: #111 !important; }
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    overflow: hidden;
+    background-color: #333; /* 通常時の背景色 */
+    transition: background-color 0.5s ease;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+body.fever-mode-active {
+    background-color: #111 !important; /* フィーバーモード中の暗い背景色 */
+}
+
 
 /* ロード画面のスタイル */
-#loadingScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #2c2c2c; display: flex; justify-content: center; align-items: center; z-index: 2000; color: #f0f0f0; text-align: center; flex-direction: column; }
-#loadingScreen .loading-content { padding: 20px; } #loadingMessage { font-size: 1.2em; margin-bottom: 20px; }
+#loadingScreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #2c2c2c;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    color: #f0f0f0;
+    text-align: center;
+    flex-direction: column;
+}
+#loadingScreen .loading-content { padding: 20px; }
+#loadingMessage { font-size: 1.2em; margin-bottom: 20px; }
 .progress-bar-container { width: 80%; max-width: 300px; height: 20px; background-color: #555; border-radius: 10px; margin: 0 auto 10px auto; overflow: hidden; }
 #loadingProgressBar { width: 0%; height: 100%; background-color: #4CAF50; border-radius: 10px; transition: width 0.1s linear; }
 #loadingPercentage { font-size: 1em; font-weight: bold; }
 
-.app-container { position: relative; width: 100%; height: 100%; max-width: 480px; margin: 0 auto; background-color: inherit; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.2); }
+/* アプリ本体のスタイル */
+.app-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    background-color: inherit; /* bodyの背景色を継承 */
+    display: flex; /* JSで表示時にflexに戻す */
+    flex-direction: column;
+    overflow: hidden; /* アプリコンテナ外へのはみ出しを制御 */
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+}
+
+/* 上部プログレスエリア */
 .progress-area { padding: 10px 15px; position: relative; z-index: 10; background-color: rgba(0,0,0,0.1); backdrop-filter: blur(2px); }
 .story-progress-bar { display: flex; height: 5px; margin-bottom: 8px; gap: 2px; }
 .story-progress-bar .segment { flex-grow: 1; background-color: rgba(255, 255, 255, 0.3); border-radius: 3px; transition: background-color 0.3s ease; }
@@ -19,16 +64,27 @@ body.fever-mode-active { background-color: #111 !important; }
 .fever-gauge-container { display: flex; align-items: center; height: 12px; background-color: rgba(0, 0, 0, 0.25); border-radius: 6px; padding: 2px; position: relative; }
 .fever-gauge { width: 0%; height: 100%; background-color: #ff4081; border-radius: 4px; transition: width 0.3s ease, background-color 0.3s ease; }
 .fever-gauge-container span { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 9px; font-weight: bold; color: white; text-shadow: 0 0 2px rgba(0,0,0,0.5); }
-.card-stack-area { flex-grow: 1; display: flex; justify-content: center; align-items: center; position: relative; padding: 10px; overflow: visible; perspective: 1000px; }
 
-.card { --member-color: #888; width: calc(100% - 40px); height: calc(100% - 80px); max-width: 340px; max-height: 520px; background-color: #1e1e1e; border-radius: 18px; position: absolute; overflow: hidden; cursor: grab; user-select: none; -webkit-user-drag: none; touch-action: none; transform-origin: center center; transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.4s ease, filter 0.4s ease, box-shadow 0.3s ease; will-change: transform, opacity, filter, box-shadow; box-shadow: 0 0 0 3px var(--member-color), inset 0 0 0 4px var(--member-color), 0 6px 15px rgba(0,0,0,0.25); }
+/* メインカードエリア */
+.card-stack-area { flex-grow: 1; display: flex; justify-content: center; align-items: center; position: relative; padding: 10px; overflow: visible; /* 奥のカードが見えるように */ perspective: 1000px; }
+
+.card {
+    --member-color: #888; /* JSで設定するメンバーカラーのデフォルト値 */
+    width: calc(100% - 40px); height: calc(100% - 80px); max-width: 340px; max-height: 520px;
+    background-color: #1e1e1e; border-radius: 18px; position: absolute; overflow: hidden;
+    cursor: grab; user-select: none; -webkit-user-drag: none; touch-action: none;
+    transform-origin: center center;
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.4s ease, filter 0.4s ease, box-shadow 0.3s ease;
+    will-change: transform, opacity, filter, box-shadow;
+    box-shadow: 0 0 0 3px var(--member-color), inset 0 0 0 4px var(--member-color), 0 6px 15px rgba(0,0,0,0.25);
+}
 .card.card-0 { transform: translateY(0) scale(1); opacity: 1; filter: blur(0px); z-index: 4; cursor: grab; }
 .card.card-1 { transform: translateY(20px) scale(0.95); opacity: 0.8; filter: blur(1px); z-index: 3; pointer-events: none; }
 .card.card-2 { transform: translateY(40px) scale(0.90); opacity: 0.6; filter: blur(2px); z-index: 2; pointer-events: none; }
 .card.card-3 { transform: translateY(60px) scale(0.85); opacity: 0.4; filter: blur(3px); z-index: 1; pointer-events: none; }
 .card.dragging-card { cursor: grabbing; transition: none !important; box-shadow: 0 0 0 4px var(--member-color), inset 0 0 0 5px var(--member-color), 0 10px 25px rgba(0,0,0,0.3); }
 
-.image-container { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; overflow: hidden; background-color: #000; border-radius: calc(18px - 3px - 4px); }
+.image-container { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; overflow: hidden; background-color: #000; border-radius: calc(18px - 3px - 4px); /* 縁取りの内側に見えるように */ }
 .card img.main-image { display: block; max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; pointer-events: none; }
 .image-aspect-portrait-cover .main-image { width: 100%; height: auto; object-fit: cover; }
 .image-aspect-landscape-letterbox.bg-black { background-color: #000000; align-items: flex-start; }
@@ -39,8 +95,8 @@ body.fever-mode-active { background-color: #111 !important; }
 .image-aspect-34-pillarbox .main-image { height: 100%; width: auto; object-fit: cover; }
 
 .card-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 15px 20px; background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0) 100%); color: white; display: flex; align-items: flex-end; pointer-events: none; z-index: 5; }
-.member-details { flex-grow: 1; min-width: 0; } /* アイコンがなくなったので profile-icon のスタイルは削除 */
-.member-quote { font-size: 0.85em; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; max-height: calc(0.85em * 1.4 * 3); } /* member-name のスタイルは削除 */
+.member-details { flex-grow: 1; min-width: 0; } /* アイコンと名前を表示しないため、profile-icon, member-name のスタイルは不要 */
+.member-quote { font-size: 0.85em; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; max-height: calc(0.85em * 1.4 * 3); }
 
 .swipe-overlay { position: absolute; top: 40%; left: 50%; transform-origin: center center; width: auto; max-width: 180px; height: auto; opacity: 0; pointer-events: none; z-index: 100; transform: translate(-50%, -50%) scale(0.3) rotate(-20deg); transition: opacity 0.25s ease-out, transform 0.35s cubic-bezier(0.175, 0.885, 0.320, 1.5); }
 .swipe-overlay.nope-overlay { transform: translate(-50%, -50%) scale(0.3) rotate(20deg); }
@@ -65,48 +121,82 @@ body.fever-mode-active { background-color: #111 !important; }
 .modal-content button#closeSettingsModalButton:hover { background-color: #e53935; }
 
 /* スタンプコンテナとスタンプのスタイル */
-.sticker-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    pointer-events: none;
-    overflow: hidden;
-    z-index: 150;
-}
-
+.sticker-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; overflow: hidden; z-index: 150; }
 .fever-sticker {
-    position: absolute; /* JSで left, top を設定 */
-    max-width: 80px; /* スタンプの最大幅 (お好みで調整) */
+    position: absolute;
+    max-width: 80px;
     height: auto;
-    opacity: 0; /* 初期状態は透明 (JSで表示アニメーション開始) */
-    transform: translate(-50%, -50%) scale(0.8); /* 中央基点、少し小さめ */
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
     will-change: opacity, transform, filter;
-    /* メンバーカラーに応じた色相回転 (JSで --member-color-filter-hue を設定) */
-    /* filter: hue-rotate(var(--member-color-filter-hue, 0deg)) saturate(1.2); */
-    /* ↑ JSで --member-color-filter-hue を設定しないとデフォルト0degになる */
+    /* filter: hue-rotate(var(--member-color-filter-hue, 0deg)) saturate(1.2); (個別指定に移行) */
 }
-
 .fever-sticker:not(.ayaka-sticker) {
-    /* アヤカ以外のスタンプに適用されるフィルター (JSで --member-color-filter-hue を設定) */
     filter: hue-rotate(var(--member-color-filter-hue, 0deg)) saturate(1.2) brightness(1.1);
 }
-
 .fever-sticker.ayaka-sticker {
-    filter: grayscale(100%) brightness(1.2); /* アヤカはモノクロで少し明るく */
+    filter: grayscale(100%) brightness(1.2);
 }
-
-/* スタンプの点滅アニメーション */
 @keyframes flickerAnimation {
     0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(var(--current-scale, 1)); }
-    50% { opacity: 0.6; transform: translate(-50%, -50%) scale(calc(var(--current-scale, 1) * 0.95)); } /* 少し小さく */
+    50% { opacity: 0.6; transform: translate(-50%, -50%) scale(calc(var(--current-scale, 1) * 0.95)); }
 }
-
 .fever-sticker.flicker {
-    /* JSでopacity=1にした後、このクラスを付与して点滅開始 */
-    /* --current-scale はJSで設定したランダムスケールを保持するために利用 (オプション) */
     animation: flickerAnimation 1s infinite alternate ease-in-out;
 }
 
+/* ★ フィーバーエッジエフェクトのスタイル */
+.fever-edge-effect {
+    position: fixed; /* 画面の端に固定 */
+    top: 0;
+    height: 100vh;   /* 画面の高さ一杯 */
+    width: 15%;      /* 画面幅の15%程度 (お好みで調整) */
+    max-width: 100px; /* 最大幅も指定しておくと良い */
+    z-index: 5;      /* カードより奥、背景より手前 */
+    display: none;   /* 初期状態は非表示 */
+    pointer-events: none;
+    overflow: hidden;
+}
+.fever-edge-effect.active {
+    display: block; /* フィーバー中に表示 */
+    animation: continuousHueRotate 8s infinite linear; /* コンテナに色相回転を適用 (8秒で1周) */
+}
+#feverEdgeLeft {
+    left: 0;
+}
+#feverEdgeRight {
+    right: 0;
+    transform: scaleX(-1); /* 右側の画像は反転させて対称的に見せる (任意) */
+}
+.fever-edge-effect .fever-edge-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%; /* 親コンテナの高さに合わせる */
+    width: 100%;  /* 親コンテナの幅に合わせる */
+    object-fit: cover; /* コンテナを埋めるように調整 */
+}
+/* 画像のフェード切り替えアニメーション */
+@keyframes crossFade1 {
+  0%, 45% { opacity: 1; transform: scale(1.03); } /* 少しだけ動きを付ける */
+  50%, 100% { opacity: 0; transform: scale(1); }
+}
+@keyframes crossFade2 {
+  0%, 45% { opacity: 0; transform: scale(1); }
+  50%, 100% { opacity: 1; transform: scale(1.03); }
+}
+/* .active クラスが付いたときにアニメーションを開始 */
+.fever-edge-effect.active .fever-edge-img.fever-img-1 {
+    animation: crossFade1 4s infinite ease-in-out; /* 例: 4秒で1サイクル */
+}
+.fever-edge-effect.active .fever-edge-img.fever-img-2 {
+    animation: crossFade2 4s infinite ease-in-out; /* fever-img-1と同期して切り替わる */
+}
+/* 色相回転アニメーション (コンテナに適用) */
+@keyframes continuousHueRotate {
+    from { filter: hue-rotate(0deg) brightness(1.1); } /* 少し明るくする */
+    to { filter: hue-rotate(360deg) brightness(1.1); }
+}
+
+/* 表示するカードがない場合のメッセージ */
 .card-stack-area p { color: white; text-align: center; font-size: 1.1em; padding: 20px; }
