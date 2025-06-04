@@ -1,4 +1,4 @@
-/* style.css - 全文 (フィーバーエッジエフェクトのz-index調整・デバッグ表示解除) */
+/* style.css - 全文 (フィーバーエッジエフェクト合成モードをスクリーンに変更) */
 
 /* 基本的なリセットと設定 */
 body, html {
@@ -144,22 +144,21 @@ body.fever-mode-active {
     height: 100vh;
     width: 15%;
     max-width: 100px;
-    z-index: 0; /* ★ カードより奥、背景よりは手前にするため値を小さく (例: 0 や 1) */
-    display: none;   /* ★ 初期状態は非表示に戻す */
+    z-index: 0; /* カードより奥、背景よりは手前にするため値を小さく */
+    display: none;   /* 初期状態は非表示 */
     pointer-events: none;
     overflow: hidden;
-    /* デバッグ用の opacity と background-color は削除 */
 }
 .fever-edge-effect.active {
-    display: block; /* ★ フィーバー中に表示 */
-    animation: continuousHueRotate 8s infinite linear; /* ★ .active クラスが付いた時に色相回転 */
+    display: block; /* フィーバー中に表示 */
+    animation: continuousHueRotate 8s infinite linear; /* コンテナに色相回転 */
 }
 #feverEdgeLeft {
     left: 0;
 }
 #feverEdgeRight {
     right: 0;
-    transform: scaleX(-1);
+    transform: scaleX(-1); /* 右側は反転 */
 }
 .fever-edge-effect .fever-edge-img {
     position: absolute;
@@ -168,6 +167,7 @@ body.fever-mode-active {
     height: 100%;
     width: 100%;
     object-fit: cover;
+    mix-blend-mode: screen; /* ★ 合成モードをスクリーンに設定 */
 }
 
 /* 「ギラギラ」した感じのフェード切り替えアニメーション */
