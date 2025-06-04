@@ -140,34 +140,26 @@ body.fever-mode-active {
 /* フィーバーエッジエフェクトのスタイル */
 .fever-edge-effect {
     position: fixed; top: 0; height: 100vh;
-    width: 15%; max-width: 100px; /* 幅を調整 */
+    width: 15%; max-width: 100px;
     z-index: 5; display: none; pointer-events: none; overflow: hidden;
 }
 .fever-edge-effect.active {
     display: block;
-    animation: continuousHueRotate 8s infinite linear; /* コンテナに色相回転 */
+    animation: continuousHueRotate 8s infinite linear;
 }
 #feverEdgeLeft { left: 0; }
-#feverEdgeRight { right: 0; transform: scaleX(-1); /* 右側は反転 */ }
+#feverEdgeRight { right: 0; transform: scaleX(-1); }
 .fever-edge-effect .fever-edge-img { position: absolute; top: 0; left: 0; height: 100%; width: 100%; object-fit: cover; }
-
-/* ★「ギラギラ」した感じのフェード切り替えアニメーション */
 @keyframes giragiraFade1 {
-  0%, 48% { opacity: 1; transform: scale(1.02); } /* 短時間表示、少し拡大 */
-  50%, 100% { opacity: 0; transform: scale(1); }   /* 素早く消える */
+  0%, 48% { opacity: 1; transform: scale(1.02); }
+  50%, 100% { opacity: 0; transform: scale(1); }
 }
 @keyframes giragiraFade2 {
-  0%, 48% { opacity: 0; transform: scale(1); }    /* 短時間非表示 */
-  50%, 100% { opacity: 1; transform: scale(1.02); } /* 素早く表示、少し拡大 */
+  0%, 48% { opacity: 0; transform: scale(1); }
+  50%, 100% { opacity: 1; transform: scale(1.02); }
 }
-.fever-edge-effect.active .fever-edge-img.fever-img-1 {
-    animation: giragiraFade1 0.6s infinite linear; /* ★0.6秒サイクルに変更 */
-}
-.fever-edge-effect.active .fever-edge-img.fever-img-2 {
-    animation: giragiraFade2 0.6s infinite linear; /* ★0.6秒サイクルに変更 */
-}
-
-/* 色相回転アニメーション (コンテナに適用) */
+.fever-edge-effect.active .fever-edge-img.fever-img-1 { animation: giragiraFade1 0.6s infinite linear; }
+.fever-edge-effect.active .fever-edge-img.fever-img-2 { animation: giragiraFade2 0.6s infinite linear; }
 @keyframes continuousHueRotate {
     from { filter: hue-rotate(0deg) brightness(1.1); }
     to { filter: hue-rotate(360deg) brightness(1.1); }
