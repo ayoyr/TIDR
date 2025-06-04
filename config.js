@@ -10,7 +10,7 @@ const config = {
                 hutuu: { path: 'images/mako/hutuu/', imageCount: 3 },
                 ero: { path: 'images/mako/ero/', imageCount: 8 }
             },
-            profileIcon: 'images/count/mako.jpg', // ★追加 (実際のパスに注意)
+            profileIcon: 'images/count/マコ.jpg', // ★追加 (実際のパスに注意)
             color: '#F97430',
             hueOffsetForSticker: '0deg' // ★仮の値
         },
@@ -21,7 +21,7 @@ const config = {
                 hutuu: { path: 'images/rio/hutuu/', imageCount: 6 },
                 ero: { path: 'images/rio/ero/', imageCount: 8 }
             },
-            profileIcon: 'images/count/rio.jpg', // ★追加
+            profileIcon: 'images/count/リオ.jpg', // ★追加
             color: '#68C2E3',
             hueOffsetForSticker: '200deg' // ★仮の値
         },
@@ -32,7 +32,7 @@ const config = {
                 hutuu: { path: 'images/maya/hutuu/', imageCount: 3 },
                 ero: { path: 'images/maya/ero/', imageCount: 8 }
             },
-            profileIcon: 'images/count/maya.jpg', // ★追加
+            profileIcon: 'images/count/マヤ.jpg', // ★追加
             color: '#7F3F97',
             hueOffsetForSticker: '280deg' // ★仮の値
         },
@@ -43,7 +43,7 @@ const config = {
                 hutuu: { path: 'images/riku/hutuu/', imageCount: 3 },
                 ero: { path: 'images/riku/ero/', imageCount: 2 }
             },
-            profileIcon: 'images/count/riku.jpg', // ★追加
+            profileIcon: 'images/count/リク.jpg', // ★追加
             color: '#FDE152',
             hueOffsetForSticker: '50deg' // ★仮の値
         },
@@ -54,7 +54,7 @@ const config = {
                 hutuu: { path: 'images/ayaka/hutuu/', imageCount: 0 },
                 ero: { path: 'images/ayaka/ero/', imageCount: 1 }
             },
-            profileIcon: 'images/count/ayaka.jpg', // ★追加
+            profileIcon: 'images/count/アヤカ.jpg', // ★追加
             color: '#FFFFFF',
             hueOffsetForSticker: '0deg', // アヤカはCSSで特別処理のため影響少ない想定
         },
@@ -63,7 +63,7 @@ const config = {
             name: 'マユカ',
             imageFolders: {
                 hutuu: { path: 'images/mayuka/hutuu/', imageCount: 11 },
-                ero: { path: 'images/mayuka/ero/', imageCount: 32 }
+                ero: { path: 'images/マユカ/ero/', imageCount: 32 }
             },
             profileIcon: 'images/count/mayuka.jpg', // ★追加
             color: '#00ABA9',
@@ -76,7 +76,7 @@ const config = {
                 hutuu: { path: 'images/rima/hutuu/', imageCount: 15 },
                 ero: { path: 'images/rima/ero/', imageCount: 35 }
             },
-            profileIcon: 'images/count/rima.jpg', // ★追加
+            profileIcon: 'images/count/リマ.jpg', // ★追加
             color: '#B02537',
             hueOffsetForSticker: '-10deg' // ★仮の値
         },
@@ -87,7 +87,7 @@ const config = {
                 hutuu: { path: 'images/miihi/hutuu/', imageCount: 27 },
                 ero: { path: 'images/miihi/ero/', imageCount: 54 }
             },
-            profileIcon: 'images/count/miihi.jpg', // ★追加
+            profileIcon: 'images/count/ミイヒ.jpg', // ★追加
             color: '#F8B9C9',
             hueOffsetForSticker: '340deg' // ★仮の値
         },
@@ -98,7 +98,7 @@ const config = {
                 hutuu: { path: 'images/nina/hutuu/', imageCount: 4 },
                 ero: { path: 'images/nina/ero/', imageCount: 1 }
             },
-            profileIcon: 'images/count/nina.jpg', // ★追加
+            profileIcon: 'images/count/ニナ.jpg', // ★追加
             color: '#005BAC',
             hueOffsetForSticker: '210deg' // ★仮の値
         },
