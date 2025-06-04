@@ -1,4 +1,4 @@
-/* style.css - 全文 (フィーバーエッジエフェクト追加版) */
+/* style.css - 全文 (フィーバーエッジエフェクト「ギラギラ」調整版) */
 
 /* 基本的なリセットと設定 */
 body, html {
@@ -93,9 +93,11 @@ body.fever-mode-active {
 .image-aspect-square-pillarbox .main-image { height: 100%; width: auto; object-fit: cover; }
 .image-aspect-34-pillarbox.bg-white { background-color: #ffffff; }
 .image-aspect-34-pillarbox .main-image { height: 100%; width: auto; object-fit: cover; }
+.image-aspect-default-fill .main-image {width: 100%; height: 100%; object-fit: cover;} /* 画像縦横比調整用クラス */
+
 
 .card-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 15px 20px; background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0) 100%); color: white; display: flex; align-items: flex-end; pointer-events: none; z-index: 5; }
-.member-details { flex-grow: 1; min-width: 0; } /* アイコンと名前を表示しないため、profile-icon, member-name のスタイルは不要 */
+.member-details { flex-grow: 1; min-width: 0; }
 .member-quote { font-size: 0.85em; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; max-height: calc(0.85em * 1.4 * 3); }
 
 .swipe-overlay { position: absolute; top: 40%; left: 50%; transform-origin: center center; width: auto; max-width: 180px; height: auto; opacity: 0; pointer-events: none; z-index: 100; transform: translate(-50%, -50%) scale(0.3) rotate(-20deg); transition: opacity 0.25s ease-out, transform 0.35s cubic-bezier(0.175, 0.885, 0.320, 1.5); }
@@ -123,78 +125,51 @@ body.fever-mode-active {
 /* スタンプコンテナとスタンプのスタイル */
 .sticker-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; overflow: hidden; z-index: 150; }
 .fever-sticker {
-    position: absolute;
-    max-width: 80px;
-    height: auto;
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.8);
+    position: absolute; max-width: 80px; height: auto; opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8); /* JSでleft,topを設定 */
     will-change: opacity, transform, filter;
-    /* filter: hue-rotate(var(--member-color-filter-hue, 0deg)) saturate(1.2); (個別指定に移行) */
 }
-.fever-sticker:not(.ayaka-sticker) {
-    filter: hue-rotate(var(--member-color-filter-hue, 0deg)) saturate(1.2) brightness(1.1);
-}
-.fever-sticker.ayaka-sticker {
-    filter: grayscale(100%) brightness(1.2);
-}
+.fever-sticker:not(.ayaka-sticker) { filter: hue-rotate(var(--member-color-filter-hue, 0deg)) saturate(1.2) brightness(1.1); }
+.fever-sticker.ayaka-sticker { filter: grayscale(100%) brightness(1.2); }
 @keyframes flickerAnimation {
     0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(var(--current-scale, 1)); }
     50% { opacity: 0.6; transform: translate(-50%, -50%) scale(calc(var(--current-scale, 1) * 0.95)); }
 }
-.fever-sticker.flicker {
-    animation: flickerAnimation 1s infinite alternate ease-in-out;
-}
+.fever-sticker.flicker { animation: flickerAnimation 1s infinite alternate ease-in-out; }
 
-/* ★ フィーバーエッジエフェクトのスタイル */
+/* フィーバーエッジエフェクトのスタイル */
 .fever-edge-effect {
-    position: fixed; /* 画面の端に固定 */
-    top: 0;
-    height: 100vh;   /* 画面の高さ一杯 */
-    width: 15%;      /* 画面幅の15%程度 (お好みで調整) */
-    max-width: 100px; /* 最大幅も指定しておくと良い */
-    z-index: 5;      /* カードより奥、背景より手前 */
-    display: none;   /* 初期状態は非表示 */
-    pointer-events: none;
-    overflow: hidden;
+    position: fixed; top: 0; height: 100vh;
+    width: 15%; max-width: 100px; /* 幅を調整 */
+    z-index: 5; display: none; pointer-events: none; overflow: hidden;
 }
 .fever-edge-effect.active {
-    display: block; /* フィーバー中に表示 */
-    animation: continuousHueRotate 8s infinite linear; /* コンテナに色相回転を適用 (8秒で1周) */
+    display: block;
+    animation: continuousHueRotate 8s infinite linear; /* コンテナに色相回転 */
 }
-#feverEdgeLeft {
-    left: 0;
+#feverEdgeLeft { left: 0; }
+#feverEdgeRight { right: 0; transform: scaleX(-1); /* 右側は反転 */ }
+.fever-edge-effect .fever-edge-img { position: absolute; top: 0; left: 0; height: 100%; width: 100%; object-fit: cover; }
+
+/* ★「ギラギラ」した感じのフェード切り替えアニメーション */
+@keyframes giragiraFade1 {
+  0%, 48% { opacity: 1; transform: scale(1.02); } /* 短時間表示、少し拡大 */
+  50%, 100% { opacity: 0; transform: scale(1); }   /* 素早く消える */
 }
-#feverEdgeRight {
-    right: 0;
-    transform: scaleX(-1); /* 右側の画像は反転させて対称的に見せる (任意) */
+@keyframes giragiraFade2 {
+  0%, 48% { opacity: 0; transform: scale(1); }    /* 短時間非表示 */
+  50%, 100% { opacity: 1; transform: scale(1.02); } /* 素早く表示、少し拡大 */
 }
-.fever-edge-effect .fever-edge-img {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%; /* 親コンテナの高さに合わせる */
-    width: 100%;  /* 親コンテナの幅に合わせる */
-    object-fit: cover; /* コンテナを埋めるように調整 */
-}
-/* 画像のフェード切り替えアニメーション */
-@keyframes crossFade1 {
-  0%, 45% { opacity: 1; transform: scale(1.03); } /* 少しだけ動きを付ける */
-  50%, 100% { opacity: 0; transform: scale(1); }
-}
-@keyframes crossFade2 {
-  0%, 45% { opacity: 0; transform: scale(1); }
-  50%, 100% { opacity: 1; transform: scale(1.03); }
-}
-/* .active クラスが付いたときにアニメーションを開始 */
 .fever-edge-effect.active .fever-edge-img.fever-img-1 {
-    animation: crossFade1 4s infinite ease-in-out; /* 例: 4秒で1サイクル */
+    animation: giragiraFade1 0.6s infinite linear; /* ★0.6秒サイクルに変更 */
 }
 .fever-edge-effect.active .fever-edge-img.fever-img-2 {
-    animation: crossFade2 4s infinite ease-in-out; /* fever-img-1と同期して切り替わる */
+    animation: giragiraFade2 0.6s infinite linear; /* ★0.6秒サイクルに変更 */
 }
+
 /* 色相回転アニメーション (コンテナに適用) */
 @keyframes continuousHueRotate {
-    from { filter: hue-rotate(0deg) brightness(1.1); } /* 少し明るくする */
+    from { filter: hue-rotate(0deg) brightness(1.1); }
     to { filter: hue-rotate(360deg) brightness(1.1); }
 }
 
