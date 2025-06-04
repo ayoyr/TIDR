@@ -1,4 +1,4 @@
-/* style.css - 全文 (フィーバーエッジエフェクトを常時表示デバッグ版) */
+/* style.css - 全文 (フィーバーエッジエフェクトのz-index調整・デバッグ表示解除) */
 
 /* 基本的なリセットと設定 */
 body, html {
@@ -126,7 +126,7 @@ body.fever-mode-active {
 .sticker-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; overflow: hidden; z-index: 150; }
 .fever-sticker {
     position: absolute; max-width: 80px; height: auto; opacity: 0;
-    transform: translate(-50%, -50%) scale(0.8); /* JSでleft,topを設定 */
+    transform: translate(-50%, -50%) scale(0.8);
     will-change: opacity, transform, filter;
 }
 .fever-sticker:not(.ayaka-sticker) { filter: hue-rotate(var(--member-color-filter-hue, 0deg)) saturate(1.2) brightness(1.1); }
@@ -137,30 +137,29 @@ body.fever-mode-active {
 }
 .fever-sticker.flicker { animation: flickerAnimation 1s infinite alternate ease-in-out; }
 
-/* ★ フィーバーエッジエフェクトのスタイル (常時表示デバッグ版) */
+/* フィーバーエッジエフェクトのスタイル */
 .fever-edge-effect {
     position: fixed;
     top: 0;
     height: 100vh;
     width: 15%;
     max-width: 100px;
-    z-index: 5;
-    /* display: none; */ /* ← 初期非表示をコメントアウト */
-    display: block !important; /* ★ 強制的に表示 */
-    opacity: 1 !important; /* ★ 強制的に不透明に (デバッグ用) */
-    background-color: rgba(0, 0, 255, 0.2) !important; /* ★ 確認用に背景色 (デバッグ用) */
+    z-index: 0; /* ★ カードより奥、背景よりは手前にするため値を小さく (例: 0 や 1) */
+    display: none;   /* ★ 初期状態は非表示に戻す */
     pointer-events: none;
     overflow: hidden;
-    animation: continuousHueRotate 8s infinite linear; /* ★ .active クラスなしで常に色相回転 */
+    /* デバッグ用の opacity と background-color は削除 */
 }
-/* .fever-edge-effect.active は display:block のためだけだったので、上記で display:block !important にした場合は不要 */
-
+.fever-edge-effect.active {
+    display: block; /* ★ フィーバー中に表示 */
+    animation: continuousHueRotate 8s infinite linear; /* ★ .active クラスが付いた時に色相回転 */
+}
 #feverEdgeLeft {
     left: 0;
 }
 #feverEdgeRight {
     right: 0;
-    transform: scaleX(-1); /* 右側は反転 */
+    transform: scaleX(-1);
 }
 .fever-edge-effect .fever-edge-img {
     position: absolute;
@@ -181,11 +180,11 @@ body.fever-mode-active {
   50%, 100% { opacity: 1; transform: scale(1.02); }
 }
 
-/* .active クラスなしで常にアニメーションを適用 */
-.fever-edge-effect .fever-edge-img.fever-img-1 {
+/* .active クラスが付いたときにアニメーションを適用 */
+.fever-edge-effect.active .fever-edge-img.fever-img-1 {
     animation: giragiraFade1 0.6s infinite linear;
 }
-.fever-edge-effect .fever-edge-img.fever-img-2 {
+.fever-edge-effect.active .fever-edge-img.fever-img-2 {
     animation: giragiraFade2 0.6s infinite linear;
 }
 
